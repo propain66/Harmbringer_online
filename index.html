@@ -268,6 +268,7 @@
   .dmgText.heal { color: #1f6a2a; }
   #edgeTip { position: absolute; padding: 2px 8px; font-size: 13px; pointer-events: none; z-index: 7; }
 </style>
+<link rel="stylesheet" href="ui.css?v=1">
 <!-- Game data: classic scripts, loaded before the game module -->
 <!-- ?v=… forces browsers (GitHub Pages caches 10 min) to load data that matches this index.html.
      Bump it whenever a data format changes. -->
@@ -288,9 +289,9 @@
 <!-- World map UI -->
 <!-- World HUD in the manner of Heroes of Might and Magic: a sidebar on the right (minimap, armies,
      actions, army details) and a bar at the bottom (resources, threat, time). -->
-<div id="header" class="hidden">
+<div id="header" class="hidden" role="region" aria-label="Kampagnenübersicht">
   <div id="bottomBar" class="panel">
-    <div id="resources"></div>
+    <div id="resources" role="group" aria-label="Ressourcen und Kommando"></div>
     <button id="threatChip" title="Bedrohung der Fraktionen (Klick für alle)"></button>
     <button id="btnNews" title="Chronik: alle Meldungen der Welt (N)">📜 Chronik</button>
     <div class="spacer"></div>
@@ -307,11 +308,12 @@
     <button id="btnNewGame" title="Spielstand löschen und neu beginnen">Neues Spiel</button>
   </div>
 </div>
-<div id="sidebar" class="hidden">
+<div id="sidebar" class="hidden" role="complementary" aria-label="Weltkarte und Armeen">
+  <div class="sidebarBrand"><span>Harmbringer</span><small>Die Chronik des Lichs</small></div>
   <div id="minimap" class="hidden"><canvas id="miniMap" title="Klick: Kamera dorthin · Mausrad: Zoom"></canvas>
   <div class="zoom"><button id="miniIn" title="Hineinzoomen">+</button><button id="miniOut" title="Herauszoomen">−</button><button id="miniMode">◎</button></div>
   <div class="zoomLabel" id="miniZoom">1×</div></div>
-  <div id="worldButtons" class="hidden">
+  <div id="worldButtons" class="hidden" role="group" aria-label="Kampagnenaktionen">
     <button id="btnHome" title="Zum Hügelgrab (H)"><span class="ic">⌂</span>Hügelgrab</button>
     <button id="btnRecruitSite" title="Nächster Ort zum Rekrutieren, mehrmals klicken für die nächsten (R)"><span class="ic">☠</span>Rekrutieren</button>
     <button id="btnBuild" title="Gebäude im Hügelgrab bauen – geht von überall (B)"><span class="ic">⚒</span>Bauen</button>
@@ -353,7 +355,7 @@
   <p id="loadingText">Lade Höhenkarte …</p>
   <div class="bar"><div id="loadingBar"></div></div>
 </div></div>
-<div id="modal" class="modal hidden"><div class="panel" id="modalBody"></div></div>
+<div id="modal" class="modal hidden" role="dialog" aria-modal="true" aria-label="Spielmenü"><div class="panel" id="modalBody"></div></div>
 <script type="module">
 import * as THREE from 'three';
 import { CSS2DRenderer, CSS2DObject } from 'three/addons/renderers/CSS2DRenderer.js';
@@ -386,7 +388,7 @@ const MAP = DATA.map;
 const HEX = DATA.hex;
 const CAM = DATA.camera;
 // <GEN:VERSION> written by tools/make_version.py - do not edit by hand
-const BUILD = {"version": 120, "date": "2026-11-04", "changes": [{"date": "04.11. 23:01", "text": "Minimap: Knopf für Zoom auf Mausposition oder Kamera"}, {"date": "04.11. 22:52", "text": "Debug im Kampf: Werte ändern, Einheit töten, Sieg, durch Wände"}, {"date": "04.11. 22:46", "text": "Debug: Ressourcen und Fern-Rekrutierung"}, {"date": "04.11. 22:37", "text": "Esc schließt Fenster"}, {"date": "04.11. 22:33", "text": "Spielstände: Bereinigung beim Laden (Schutz vor Skript-Einschleusung)"}, {"date": "04.11. 22:25", "text": "Rekrutieren: Kategorien und Sortierung; Fix negativer Lich durch Anführer"}, {"date": "04.11. 22:22", "text": "Lich-Tod: automatischer Weiterkampf, Verwaiste abholen"}, {"date": "04.11. 22:14", "text": "Rekrutieren/Bauen: Ressourcenleiste bleibt oben"}, {"date": "04.11. 22:11", "text": "Massive geschlossene Gebäude, Ballisten-Initiative 5"}, {"date": "04.11. 22:07", "text": "Rückzug kostet nur noch 25 % der Truppen"}, {"date": "04.11. 22:04", "text": "Fix: keine Aufstellung in Gebäuden ohne Tür"}, {"date": "04.11. 21:48", "text": "Ladefehler: klarere Meldung mit Neu-laden-Knopf"}]};
+const BUILD = {"version": 127, "date": "2026-11-04", "changes": [{"date": "04.11. 23:07", "text": "Oberfläche: lesbare Ressourcen, klare Sidebar und größere Dialoge"}, {"date": "04.11. 23:01", "text": "Minimap: Zoom auf Maus oder Kamera umschaltbar"}, {"date": "04.11. 22:52", "text": "Debug im Kampf: Werte ändern, Einheit töten, Sieg, durch Wände"}, {"date": "04.11. 22:46", "text": "Debug: Ressourcen und Fern-Rekrutierung"}, {"date": "04.11. 22:37", "text": "Esc schließt Fenster"}, {"date": "04.11. 22:33", "text": "Spielstände: Bereinigung beim Laden (Schutz vor Skript-Einschleusung)"}, {"date": "04.11. 22:25", "text": "Rekrutieren: Kategorien und Sortierung; Fix negativer Lich durch Anführer"}, {"date": "04.11. 22:22", "text": "Lich-Tod: automatischer Weiterkampf, Verwaiste abholen"}, {"date": "04.11. 22:14", "text": "Rekrutieren/Bauen: Ressourcenleiste bleibt oben"}, {"date": "04.11. 22:11", "text": "Massive geschlossene Gebäude, Ballisten-Initiative 5"}, {"date": "04.11. 22:07", "text": "Rückzug kostet nur noch 25 % der Truppen"}, {"date": "04.11. 22:04", "text": "Fix: keine Aufstellung in Gebäuden ohne Tür"}]};
 // </GEN:VERSION>
 const ECON = DATA.economy;
 const THREAT = DATA.threat;

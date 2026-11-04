@@ -22,7 +22,9 @@ Die Weltkarte lädt ihre Daten per `fetch` und läuft deshalb nur über einen We
 
 ## Lokal starten
 
-Repo herunterladen, entpacken, `index.html` doppelklicken. Der Ordner `data/` muss direkt neben `index.html` liegen. Three.js r160 wird beim Start von jsDelivr geladen.
+Repo herunterladen, entpacken, `index.html` doppelklicken. Der Ordner `data/` und die Datei `ui.css` müssen direkt neben `index.html` liegen. Three.js r160 wird beim Start von jsDelivr geladen.
+
+Alternativ im Projektordner `python -m http.server 8000` ausführen (unter Windows auch `py -m http.server 8000`) und `http://localhost:8000` öffnen. Änderungen an der Oberfläche stehen in `ui.css`; nach dem Bearbeiten die Seite neu laden. Bei zwischengespeicherten Styles hilft `Strg + F5`.
 
 ## Steuerung
 
@@ -35,6 +37,7 @@ Repo herunterladen, entpacken, `index.html` doppelklicken. Der Ordner `data/` mu
 | Datei | Inhalt |
 | --- | --- |
 | `index.html` | Das komplette Spiel (eine Datei, kein Build-Schritt) |
+| `ui.css` | Oberfläche: lesbare Ressourcen, Sidebar, Einheitenkarten und Dialoge; ergänzt die Grundstile in `index.html` |
 | `data/world_data.js` | Alle Spielwerte: Einheiten, Fraktionen, Orte, Wirtschaft, Bodentypen |
 | `data/heightmap.js` | Höhendaten im UTM-Kampagnenraster (2017 × 1583 Hex-Felder à ~247 m, 16 Bit in Metern, Base64; Harz über 450 m aus Gipfelhöhen genähert), erzeugt von `tools/build_game_map.py` |
 | `data/ground_textures.js` | Bodentexturen als Data-URIs (`tools/build_game_textures.py`) |

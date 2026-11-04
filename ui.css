@@ -1,0 +1,277 @@
+/* Interface refinement. The map, combat rendering and game rules keep their existing styles. */
+:root {
+  --parchment: #f1e9d6;
+  --parchment-dark: #e2d6bc;
+  --ink: #2e2923;
+  --ink-soft: #685e4f;
+  --undead: #664080;
+  --gold: #b58b3d;
+  --ui-line: rgba(82, 62, 36, .22);
+  --ui-paper: #fbf5e8;
+  --ui-font: "Segoe UI", system-ui, -apple-system, sans-serif;
+  --side: clamp(296px, 24vw, 352px);
+  --bar: 80px;
+}
+
+#header, #sidebar, #info, .modal, #unitCard, #hoverCard,
+#battleButtons, #battleLog, #roundInfo, #toast, #edgeTip {
+  font-family: var(--ui-font);
+  line-height: 1.45;
+  font-size: 15px;
+}
+
+.panel {
+  border: 1px solid #a58d66;
+  border-radius: 10px;
+  background: linear-gradient(135deg, var(--ui-paper), var(--parchment));
+  box-shadow: 0 8px 28px rgba(24, 19, 13, .28), inset 0 1px rgba(255, 255, 255, .75);
+}
+
+button {
+  min-height: 36px;
+  padding: 7px 13px;
+  border-color: #b8a583;
+  border-radius: 6px;
+  background: linear-gradient(#faf4e6, #e8ddc5);
+  font-family: var(--ui-font);
+  font-size: 14px;
+  line-height: 1.35;
+  font-weight: 600;
+  box-shadow: inset 0 1px rgba(255, 255, 255, .7), 0 1px 2px #30271912;
+  transition: background-color .15s, border-color .15s, box-shadow .15s;
+}
+
+button:hover:not(:disabled) {
+  border-color: var(--gold);
+  background: #fffaf0;
+  box-shadow: 0 2px 8px #3b2b191a;
+}
+
+button:active:not(:disabled) { background: #ddd0b5; }
+button:disabled { opacity: .5; box-shadow: none; }
+button.primary {
+  border-color: #50305f;
+  color: #fff8ed;
+  background: linear-gradient(#79518f, #5b376d);
+  box-shadow: inset 0 1px #ffffff26, 0 2px 6px #32163c26;
+}
+button.primary:hover:not(:disabled) { background: #774a90; border-color: #9b78af; }
+button.primary .small { color: #eee1f6; }
+button:focus-visible, input:focus-visible, summary:focus-visible, a:focus-visible {
+  outline: 3px solid var(--undead);
+  outline-offset: 3px;
+}
+input[type="number"] {
+  min-height: 36px;
+  padding: 5px 8px;
+  border: 1px solid #b8a583;
+  border-radius: 5px;
+  background: #fffaf0;
+  color: var(--ink);
+  font: 15px/1.4 var(--ui-font);
+  font-variant-numeric: tabular-nums;
+}
+
+h2, h3, .sidebarBrand > span {
+  font-family: "IM Fell English", Georgia, serif;
+  font-weight: normal;
+}
+h2 { font-size: 27px; line-height: 1.2; border-bottom-color: var(--ui-line); padding-bottom: 12px; }
+h3 { font-size: 21px; line-height: 1.3; margin: 18px 0 8px; }
+.small { font-size: 14px; line-height: 1.5; }
+kbd { font-size: 11px; line-height: 16px; border-radius: 3px; opacity: .8; }
+
+/* The sidebar has its own visual hierarchy: title, map, actions, army. */
+#sidebar {
+  padding: 14px;
+  gap: 12px;
+  background: linear-gradient(160deg, #efe5ce, #d8c9a8);
+  border-left: 1px solid #967c51;
+  box-shadow: -6px 0 24px #1e170d33;
+}
+.sidebarBrand { padding: 0 2px 10px; border-bottom: 1px solid #94764855; flex-shrink: 0; }
+.sidebarBrand > span { display: block; font-size: 28px; line-height: 1.1; letter-spacing: .025em; }
+.sidebarBrand small { display: block; margin-top: 4px; color: var(--ink-soft); font-size: 11px; letter-spacing: .12em; text-transform: uppercase; }
+#sidebar #minimap { overflow: hidden; border: 1px solid #8a7657; border-radius: 8px; flex-shrink: 0; box-shadow: 0 2px 10px #251b1026; }
+#sidebar #minimap canvas { width: 100%; height: auto; }
+#minimap .zoom button { width: 30px; height: 30px; min-height: 30px; border-color: #ad9673; background: #fbf4e5eb; }
+#minimap .zoomLabel { padding: 2px 6px; border: 0; border-radius: 4px; background: #fbf4e5e8; font: 12px/1.4 var(--ui-font); }
+#worldButtons { gap: 7px; flex-shrink: 0; }
+#worldButtons button { min-height: 61px; gap: 5px; padding: 8px 3px; font-size: 13px; line-height: 1.2; }
+#worldButtons button .ic { font: 24px/1 Georgia, serif; color: #68457d; }
+#worldButtons #btnGo { min-height: 42px; gap: 8px; font-size: 15px; }
+#worldButtons .badge { top: 5px; right: 5px; min-width: 18px; font: 600 11px/18px var(--ui-font); }
+#armyPanel { padding-top: 12px; border-top-color: #94764855; }
+#armyPanel .armyRows { gap: 6px; margin-bottom: 12px; }
+.armyRow { gap: 9px; min-height: 58px; padding: 7px; border: 1px solid var(--ui-line); border-radius: 7px; background: #fff8e96b; }
+.armyRow:hover { background: #fff8e9c9; }
+.armyRow.on { border-color: #9c7840; background: #fcf3df; box-shadow: inset 3px 0 var(--gold); }
+.armyRow .portrait { width: 40px; height: 40px; flex-basis: 40px; }
+.armyRow .rTxt { font-size: 12px; line-height: 1.5; }
+.armyRow .rTxt b { font-size: 14px; }
+#armyPanel .armyCards { padding-right: 3px; gap: 7px; }
+.aCard { gap: 10px; min-height: 76px; padding: 9px; border: 1px solid var(--ui-line); border-radius: 8px; background: #fff9eb9c; }
+.aCard.lich { border-color: #b99b60; background: linear-gradient(110deg, #fff8e7, #e8d9ef); }
+.aCard .portrait { width: 52px; height: 52px; flex-basis: 52px; border: 1px solid #8b785b; border-radius: 6px; }
+.aName { margin-bottom: 4px; font-size: 15px; }
+.aName .lvl { display: inline-block; padding: 1px 6px; font-size: 11px; vertical-align: 1px; }
+.aStats { gap: 2px 9px; font: 12px/1.4 var(--ui-font); font-variant-numeric: tabular-nums; }
+.aCnt { left: 44px; top: 46px; padding: 0 5px; border: 1px solid #f1e9d6; font: 600 11px/17px var(--ui-font); }
+.hpbar { height: 7px; overflow: hidden; border: 1px solid #73614e88; border-radius: 4px; background: #c8bca7; }
+.hpbar.player div { background: linear-gradient(90deg, #583268, #9a75ac); }
+
+/* Resource names stay visible, while long values stay inside their columns. */
+#bottomBar { gap: 12px; padding: 10px 16px; border-radius: 0; border: 0; border-top: 1px solid #b49b72; background: linear-gradient(#fbf4e5, #e9dcc0); box-shadow: 0 -4px 18px #20170b26; }
+#resources { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 4px; flex: 1 1 440px; min-width: 0; }
+#resources .chip { display: grid; grid-template-columns: 22px minmax(0, 1fr); grid-template-rows: auto auto; gap: 0 6px; min-width: 0; padding: 4px 7px; border-right-color: #6e573729; border-radius: 4px; font-size: 16px; }
+#resources .chip:last-child { border-right: 0; }
+#resources .chip > .resIcon { grid-row: 1 / 3; align-self: center; width: 21px; height: 21px; margin: 0; }
+#resources .chip b { grid-column: 2; overflow: hidden; text-overflow: ellipsis; font: 700 16px/1.3 var(--ui-font); font-variant-numeric: tabular-nums; }
+#resources .chip .lbl { display: block; grid-column: 2; font: 11px/1.4 var(--ui-font); color: var(--ink-soft); }
+#bottomBar .spacer { display: none; }
+#threatChip, #btnNews { min-height: 38px; height: auto; padding: 7px 10px; font-size: 13px; }
+#threatChip .mini { height: 17px; }
+#btnNews .badge { min-width: 19px; border-radius: 10px; font: 600 11px/19px var(--ui-font); }
+#status { gap: 8px; flex-shrink: 0; }
+#dial svg { width: 34px; height: 34px; }
+#dayNo { font: 600 16px/1.3 var(--ui-font); }
+#clock { font-size: 12px; line-height: 1.5; }
+#clock .small { display: none; }
+#date { display: none; }
+#timeDelta { border-radius: 6px; }
+#threatPop { left: 16px; width: 350px; padding: 18px; }
+#threatPop .threat { font-size: 14px; padding: 7px 0; border-bottom: 1px solid var(--ui-line); }
+#threatPop .threat .small { font-size: 12px; }
+#menuPop { right: calc(var(--side) + 14px); bottom: 16px; min-width: 220px; gap: 6px; padding: 12px; }
+#menuPop button { min-height: 42px; padding: 9px 13px; }
+
+#info { top: 16px; right: calc(var(--side) + 16px); width: 344px; max-height: calc(100% - var(--bar) - 32px); padding: 20px; }
+#info .close { right: 10px; top: 10px; width: 30px; height: 30px; min-height: 30px; border-radius: 50%; font-size: 18px; }
+#info h2 { margin: 0 0 10px; padding-right: 24px; }
+#info .sub { gap: 8px; font-size: 13px; margin-bottom: 14px; }
+#info td { padding: 6px 0; font-size: 14px; }
+#info td:first-child { padding-right: 12px; }
+#info .buttons { gap: 8px; margin-top: 16px; }
+#info .buttons button { flex: 1 1 auto; min-height: 40px; }
+#info details { margin-top: 14px; padding-top: 10px; border-top: 1px solid var(--ui-line); font-size: 14px; }
+#info summary { padding: 3px 0; }
+
+/* Dialogs use generous rows and larger targets without changing their actions. */
+.modal { background: #1b17116b; backdrop-filter: blur(3px); }
+.modal .panel { max-width: 720px; width: calc(100% - 40px); max-height: calc(100% - 40px); padding: 26px 30px; }
+.modal .panel.wide { max-width: 1080px; }
+.modal p { font-family: var(--ui-font); font-size: 15px; line-height: 1.65; }
+.modal .buttons { gap: 10px; flex-wrap: wrap; margin-top: 22px; padding-top: 16px; border-top: 1px solid var(--ui-line); }
+.modal .buttons button { min-height: 42px; }
+.modalClose { top: -14px; margin: -12px -16px 0 8px; width: 32px; height: 32px; min-height: 32px; border-radius: 50%; }
+.stickyRes { top: -26px; margin: 0 -30px 14px; padding: 12px 30px; background: #f5eddc; font-family: var(--ui-font); font-size: 15px; border-bottom-color: var(--ui-line); }
+.stickyRes .cost { display: inline-block; margin-bottom: 4px; }
+.recruitRow { grid-template-columns: 76px minmax(0, 1fr) auto; gap: 14px; padding: 16px 0; border-bottom: 1px solid var(--ui-line); font-size: 15px; }
+.recruitRow > div { min-width: 0; }
+.recruitRow .small { font-size: 13px; line-height: 1.55; }
+.portrait { border-radius: 7px; }
+.recruitBtns { gap: 6px; max-width: 260px; }
+.recruitBtns button { min-height: 34px; padding: 6px 9px; font-size: 13px; }
+.recruitBtns input { width: 72px; }
+.recruitBtns .nowrap { display: inline-flex; align-items: center; gap: 5px; }
+.recLayout { grid-template-columns: 185px minmax(0, 1fr); gap: 24px; }
+.recSide { gap: 6px; padding-right: 16px; border-right: 1px solid var(--ui-line); }
+.recSide h3 { margin: 0 0 6px; font-size: 20px; }
+.recSide button { min-height: 38px; padding: 8px 10px; font-size: 13px; }
+.recSide button.on { outline: 0; border-color: #9b7aad; background: #eadff1; color: #513166; box-shadow: inset 3px 0 var(--undead); }
+.buildRow { padding: 16px 0; border-bottom: 1px solid var(--ui-line); }
+.buildRow .bHead { gap: 10px; margin-bottom: 8px; }
+.newsDay { margin-top: 20px; padding: 8px 0; font-size: 14px; border-bottom-color: var(--ui-line); }
+.newsItem { grid-template-columns: 60px 24px minmax(0, 1fr); gap: 8px; padding: 9px 0; font-size: 14px; border-bottom: 1px solid #6b573612; }
+.newsItem .h { font-size: 12px; }
+.newsFilter { flex-wrap: wrap; gap: 6px; margin-bottom: 12px; }
+.newsFilter button { padding: 6px 10px; font-size: 13px; }
+.newsFilter button.on { outline: 0; border-color: #9972ab; background: #eadff1; color: #513166; }
+
+#unitCard, #hoverCard { width: 320px; padding: 16px; }
+#unitCard .ucStats, #hoverCard .ucStats { gap: 5px 12px; font-size: 14px; margin: 10px 0; }
+#unitCard .ucRow, #hoverCard .ucRow { font-size: 13px; margin-top: 6px; }
+#unitCard .ucRow > span:first-child, #hoverCard .ucRow > span:first-child { min-width: 90px; }
+#battleLog { padding: 7px 12px; font-size: 14px; border-color: #b8a583; border-radius: 6px; }
+#battleButtons { gap: 7px; }
+#battleButtons > button { min-height: 40px; }
+#abilityBar button { min-height: 36px; padding: 7px 10px; font-size: 13px; }
+#toast { padding: 12px 22px; border-left: 4px solid var(--undead); font-size: 15px; }
+#narrator { border-radius: 9px; padding: 15px 20px; background: #211b17f5; box-shadow: 0 8px 30px #0005; }
+#narrator .nn { font-size: 13px; }
+#narrator.char .nt, #narrator.hint .nt { font-size: 16px; line-height: 1.55; }
+#narrator.chron .nt { font-size: 19px; }
+
+#sidebar *, .modal .panel, #info, #battleLog, #threatPop {
+  scrollbar-width: thin;
+  scrollbar-color: #a38b65 transparent;
+}
+
+@media (max-width: 1250px) {
+  #bottomBar { gap: 8px; padding-right: 10px; padding-left: 10px; }
+  #resources .chip { grid-template-columns: 18px minmax(0, 1fr); gap: 0 4px; padding: 4px; }
+  #resources .chip > .resIcon { width: 17px; height: 17px; }
+  #resources .chip b { font-size: 14px; }
+  #resources .chip .lbl { font-size: 10px; }
+  #threatChip, #btnNews { padding: 7px; font-size: 12px; }
+  #status { gap: 6px; }
+  #dayNo { font-size: 14px; }
+  #dial svg { width: 28px; height: 28px; }
+  #info { width: 306px; padding: 16px; }
+}
+
+@media (max-width: 1080px) {
+  :root { --side: 296px; --bar: 112px; }
+  #sidebar { padding: 10px; gap: 10px; }
+  #bottomBar { display: grid; grid-template-columns: minmax(0, 1fr) auto auto; gap: 6px 10px; padding: 8px 12px; }
+  #resources { grid-column: 1 / -1; }
+  #resources .chip b { font-size: 15px; }
+  #resources .chip .lbl { font-size: 11px; }
+  #threatChip { justify-self: start; }
+  #status { justify-self: end; }
+  #clock { font-size: 11px; }
+  #info { width: 286px; right: calc(var(--side) + 12px); }
+  .sidebarBrand > span { font-size: 25px; }
+}
+
+@media (max-height: 760px) and (min-width: 761px) {
+  #sidebar { gap: 8px; }
+  .sidebarBrand { padding-bottom: 7px; }
+  .sidebarBrand > span { font-size: 24px; }
+  .sidebarBrand small { font-size: 10px; }
+  #worldButtons button { min-height: 51px; padding: 6px 2px; gap: 3px; }
+  #worldButtons button .ic { font-size: 21px; }
+  #armyPanel { padding-top: 8px; }
+  .aCard { min-height: 68px; padding: 7px; }
+  .aCard .portrait { width: 46px; height: 46px; flex-basis: 46px; }
+}
+
+@media (max-width: 760px) {
+  :root { --side: 260px; }
+  #sidebar { padding: 8px; gap: 8px; }
+  .sidebarBrand > span { font-size: 23px; }
+  .sidebarBrand small { font-size: 10px; }
+  #worldButtons button { font-size: 11px; min-height: 54px; }
+  #info { right: calc(var(--side) + 8px); top: 8px; width: min(286px, calc(100vw - var(--side) - 16px)); padding: 12px; }
+  #status #dial { display: none; }
+  #status { gap: 5px; }
+  #threatChip .mini { display: none; }
+  #resources .chip { grid-template-columns: 1fr; text-align: center; }
+  #resources .chip > .resIcon { display: none; }
+  #resources .chip b, #resources .chip .lbl { grid-column: 1; }
+  .modal .panel { padding: 20px; width: calc(100% - 24px); }
+  .modal h2 { font-size: 24px; }
+  .stickyRes { top: -20px; margin: 0 -20px 10px; padding: 10px 20px; }
+  .recLayout { grid-template-columns: 1fr; gap: 14px; }
+  .recSide { position: static; flex-direction: row; flex-wrap: wrap; border-right: 0; border-bottom: 1px solid var(--ui-line); padding: 0 0 14px; }
+  .recSide h3 { flex-basis: 100%; }
+  .recruitRow { grid-template-columns: 64px minmax(0, 1fr); gap: 12px; }
+  .recruitRow .portrait { width: 64px; height: 64px; }
+  .recruitRow > .recruitBtns { grid-column: 1 / -1; max-width: none; justify-content: flex-end; }
+  #menuPop { right: calc(var(--side) + 8px); min-width: 190px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button, #toast, #narrator { transition: none; }
+  .modal { backdrop-filter: none; }
+}
