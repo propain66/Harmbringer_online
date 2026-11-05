@@ -1,0 +1,185 @@
+/* Harmbringer: wrought-iron Warcraft-style overworld HUD + illustrated panels. */
+:root{--side:0px;--bar:70px}
+#header{z-index:8!important}
+#header #bottomBar{
+ top:0!important;bottom:auto!important;left:0!important;right:0!important;
+ width:100%!important;height:70px!important;
+ padding:0 14px!important;display:flex!important;align-items:center!important;gap:10px!important;
+ background:linear-gradient(180deg,#533b2b 0%,#281f1b 16%,#211918 78%,#66503a 94%,#161014 100%)!important;
+ border:0!important;border-bottom:5px ridge #927349!important;
+ box-shadow:0 4px 20px #000a,inset 0 0 0 2px #150d0c!important;
+}
+#hbBrand{position:absolute;left:50%;transform:translateX(-50%);top:-5px;height:80px;min-width:270px;
+ display:flex;flex-direction:column;align-items:center;justify-content:center;pointer-events:none;
+ background:linear-gradient(90deg,#3e1726,#752c3a 12%,#893d46 50%,#752c3a 88%,#3e1726);
+ border:5px ridge #b99b62;clip-path:polygon(0 0,100% 0,100% 79%,85% 92%,55% 86%,50% 100%,45% 86%,15% 92%,0 79%);
+ box-shadow:0 4px 8px #000c;z-index:3}
+#hbBrand>span{font:normal 33px/1.1 "IM Fell English",Georgia,serif;color:#f0cb80;text-shadow:0 3px #2c1214,0 0 8px #16090c;letter-spacing:.035em}
+#hbBrand small{font:17px Georgia;color:#e5d0a8;margin-top:-1px}
+#header #bottomBar #resources{order:3;margin-left:auto;gap:0;position:relative;z-index:2;min-width:0}
+#resources .chip{display:flex!important;flex-direction:column;position:relative;gap:0!important;
+ padding:0 12px!important;border-right:2px ridge #6e5542!important;
+ font:normal 15px/1.1 Georgia,serif!important;height:55px;justify-content:center;
+ color:#dbc69f!important}
+#resources .chip img,#resources .chip svg{max-width:24px;max-height:24px}
+#resources .chip .lbl{display:block!important;order:0;font-size:12px;color:#e6d3b5!important}
+#resources .chip b{order:1;font-size:18px;color:#e7c36c!important}
+#resources .chip:hover{background:#634834!important}
+#bottomBar #threatChip{order:1;position:relative;z-index:2;min-height:42px!important;
+ font:16px "IM Fell English",Georgia,serif!important;min-width:126px;justify-content:center;
+ border:3px ridge #9b754b!important;background:linear-gradient(#563c2b,#231a19)!important;
+ color:#f2ddab!important}
+#bottomBar #btnNews{order:2;position:relative;z-index:2;height:42px!important;
+ font:16px "IM Fell English",Georgia,serif!important;
+ border:3px ridge #9b754b!important;background:linear-gradient(#563c2b,#231a19)!important;
+ color:#f2ddab!important}
+#bottomBar .spacer{display:none!important}
+#status{position:absolute!important;right:13px;top:72px;transform:none;
+ padding:3px 9px!important;background:linear-gradient(#382b23,#20191a);
+ border:2px ridge #916f4b;color:#e9d8ad;z-index:1;gap:6px}
+#date,#clock .small{display:none!important}
+#dayNo{font-size:14px!important}
+#dial svg{width:24px!important;height:24px!important}
+#threatPop{position:absolute!important;top:77px!important;bottom:auto!important;left:10px!important;
+ max-height:calc(100vh - 260px)!important;z-index:17!important}
+#menuPop{z-index:18!important}
+#sidebar{position:absolute!important;top:auto!important;bottom:0!important;left:0!important;right:0!important;
+ width:100%!important;height:clamp(160px,22vh,208px)!important;
+ padding:9px!important;display:flex!important;flex-direction:row!important;align-items:stretch!important;gap:10px!important;
+ border-left:0!important;border-top:7px ridge #8e6c45!important;
+ box-shadow:0 -5px 18px #000b,inset 0 0 0 3px #0d0b0e!important;
+ background:repeating-linear-gradient(90deg,#b1935a09 0 40px,transparent 41px 85px),linear-gradient(#3e2c26,#1b1518)!important;
+ z-index:7!important}
+#sidebar .sidebarBrand{display:none!important}
+#sidebar #minimap{order:1;flex:0 0 clamp(165px,16.5vw,235px);width:clamp(165px,16.5vw,235px)!important;
+ height:100%!important;max-height:100%!important;overflow:visible!important;
+ background:#100f13!important;border:5px ridge #8c734a!important}
+#sidebar #minimap canvas{width:100%!important;height:100%!important;max-height:none!important;
+ aspect-ratio:auto!important;object-fit:fill}
+#sidebar #minimap .zoom{right:3px;top:4px}
+#sidebar #minimap .zoom button{width:23px;height:23px}
+#sidebar #minimap .mapSite{
+ position:absolute!important;bottom:3px!important;left:3px!important;right:3px!important;
+ min-height:41px!important;display:flex!important;align-items:center!important;justify-content:center!important;gap:7px!important;
+ padding:4px 6px!important;border:3px ridge #bc9760!important;
+ background:linear-gradient(#61412c,#211b1b)!important;color:#edd3a2!important;
+ text-shadow:0 1px 2px #000!important;font:12px Georgia,serif!important;
+}
+#minimap .mapSite .siteIcon{font-size:24px;color:#e5b96d}
+#minimap .mapSite .siteText{display:flex;flex-direction:column;text-align:left;min-width:0}
+#minimap .mapSite .siteText strong{font:normal 15px "IM Fell English",Georgia,serif}
+#minimap .mapSite .siteText small{font-size:11px;max-width:170px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#minimap .mapSite:disabled{opacity:.78!important;filter:grayscale(.3)}
+#minimap .mapSite.atSite{border-color:#75855b!important}
+#sidebar #armyPanel{order:2;flex:1 1 auto;min-width:290px!important;min-height:0!important;height:100%;
+ display:flex!important;flex-direction:column!important;gap:5px;border:5px ridge #806846!important;
+ background:linear-gradient(115deg,#d6b78b,#e6d3ad 40%,#bea077)!important;
+ padding:7px!important;color:#3d2924!important;overflow:hidden}
+#sidebar .hudArmyStrip{display:flex;gap:4px;min-height:22px;overflow-x:auto;overflow-y:hidden}
+#sidebar .hudArmyPill{font-size:12px!important;display:flex;align-items:center;gap:6px;
+ border:2px ridge #926f4b!important;background:#d7bf98!important;color:#40291d!important;
+ white-space:nowrap;padding:1px 6px!important;min-height:20px}
+#sidebar .hudArmyPill.active{background:#693747!important;color:#f3ddb4!important}
+.hudArmyPill small{font-size:10px;opacity:.75}
+#sidebar .hudHeroPanel{display:grid;grid-template-columns:clamp(70px,8vw,120px) minmax(125px,.78fr) minmax(155px,1fr);
+ align-items:stretch;gap:10px;min-height:0;flex:1}
+.hudHeroPanel .hudPortrait{min-width:0;min-height:0;overflow:hidden;
+ border:4px ridge #8d6d45;background:radial-gradient(#624a64,#18141b)}
+.hudHeroPanel .hudPortrait .portrait{width:100%!important;height:100%!important;object-fit:contain!important;
+ background:transparent!important;border-radius:0!important}
+.hudHeroPanel .hudIdentity{min-width:0}
+.hudIdentity h2{margin:0 0 4px;font:normal clamp(19px,1.9vw,28px)/1 "IM Fell English",Georgia,serif;color:#5a2330;
+ white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+.hudIdentity h2 small{font-size:12px;color:#594537}
+.hudLocation{font-size:12px;color:#77523b;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;margin-bottom:9px}
+.hudMeter{height:24px;border:3px ridge #967751;background:#211921;position:relative;margin-top:7px;
+ box-shadow:inset 0 2px 4px #000a}
+.hudMeter>span{display:block;height:100%;background:linear-gradient(#71be57,#346726,#142e15)}
+.hudMeter.soul>span{background:linear-gradient(#b075e2,#693398,#261341)}
+.hudMeter>b{position:absolute;inset:0;text-align:center;color:#ffedcf;font-size:12px;line-height:18px;
+ text-shadow:0 1px 3px #000,0 0 3px #000;white-space:nowrap}
+.hudStats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:2px 8px;align-content:center;
+ padding-left:10px;border-left:2px ridge #9a7a4b;overflow:hidden}
+.hudStat{display:grid;grid-template-columns:20px minmax(0,1fr) auto;gap:3px;align-items:center;
+ font-size:12px;border-bottom:1px solid #967d5b55;min-width:0}
+.hudStat .statSvg{width:18px;height:18px}
+.hudStat>span{overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+.hudStat>b{color:#3a2820;font-size:12px;white-space:nowrap}
+#sidebar #worldButtons{order:3;flex:0 0 clamp(280px,24vw,396px);width:clamp(280px,24vw,396px)!important;
+ height:100%;grid-template-columns:repeat(3,1fr)!important;grid-template-rows:repeat(2,1fr) auto!important;
+ gap:5px!important;padding:0!important;align-content:stretch;overflow:hidden}
+#sidebar #worldButtons>button{min-width:0;min-height:0;font-size:clamp(10px,1vw,15px)!important;
+ padding:3px!important;border:4px ridge #9f7e4f!important;border-radius:0!important;
+ background:linear-gradient(#6a4d36,#231b1b)!important;
+ box-shadow:inset 0 0 0 2px #110d0d!important;
+ display:flex;align-items:center;justify-content:center;flex-direction:column;gap:1px}
+#worldButtons>button .ic{width:clamp(32px,3vw,52px)!important;height:clamp(32px,3vw,52px)!important;margin:0!important}
+#worldButtons>button .sigilSvg{stroke:#dfbd85!important;stroke-width:2.2px}
+#worldButtons #btnGo{grid-column:1/-1!important;font-size:12px!important;min-height:23px!important}
+#worldButtons #btnRecruitLocal:disabled{filter:grayscale(.65)}
+#info{top:85px!important;bottom:calc(clamp(160px,22vh,208px) + 12px)!important;right:15px!important;
+ max-height:calc(100vh - clamp(160px,22vh,208px) - 110px)!important;width:340px!important}
+#hint{display:none!important}
+/* Deep-cut wood ornament and stained-paper treatment for main screens */
+.modal .panel,.modal .panel.wide,#info,#threatPop{
+ background-image:radial-gradient(ellipse at 16% 6%,#fff2cc82,transparent 48%),
+  repeating-linear-gradient(102deg,#5234190b 0 1px,transparent 2px 9px),
+  linear-gradient(135deg,#efdfb9,#c7ab7e)!important;
+ border:8px ridge #816445!important;box-shadow:inset 0 0 0 2px #39271b,inset 0 0 0 5px #cfb482,0 12px 30px #000e!important;
+ clip-path:polygon(0 12px,12px 0,calc(100% - 12px) 0,100% 12px,100% calc(100% - 12px),calc(100% - 12px) 100%,12px 100%,0 calc(100% - 12px))!important}
+.buildingHeroArt{position:relative;background:radial-gradient(#746047,#21191c)!important;height:clamp(155px,25vh,235px)!important;max-height:235px!important}
+.buildingHeroArt .hbPainting{height:100%;width:100%;max-width:none!important}
+.tileArtwork{padding:0!important;overflow:hidden;position:relative}
+.tileArtwork .hbPainting{height:100%;width:100%}
+.buildingTile.selected .tileArtwork{outline:2px solid #edc879}
+.buildingTile.locked .tileArtwork{filter:grayscale(.65)}
+.tileArtwork svg{filter:drop-shadow(0 1px 2px #000)}
+.paintActionIcon{width:100%;height:100%;display:block}
+.paintActionIcon svg{width:100%;height:100%;display:block}
+#worldButtons .sigilIcon .paintActionIcon{width:100%;height:100%}
+.hbPainting .glow{filter:drop-shadow(0 0 5px #cb7cec)}
+#modalBody .screenTitle,#modalBody .upgradesHeading{box-shadow:0 3px 7px #0005}
+.buildingTileGrid{gap:10px!important}
+#threatPop .threatName:before{border-radius:0}
+@media(max-width:1420px){
+ #hbBrand{min-width:195px;height:70px}
+ #hbBrand>span{font-size:27px}
+ #header #bottomBar #resources{gap:0}
+ #resources .chip{padding:0 7px!important}
+ #resources .chip .lbl{font-size:11px}
+ #resources .chip b{font-size:15px}
+ #sidebar #worldButtons{flex-basis:300px;width:300px!important}
+ #hudBrand{display:none}
+}
+@media(max-width:1120px){
+ #hbBrand{display:none}
+ #header #bottomBar{height:62px!important}
+ #bottomBar #threatChip,#bottomBar #btnNews{min-width:auto;padding:4px}
+ #resources .chip{padding:0 4px!important}
+ #sidebar #minimap{flex:0 0 160px;width:160px!important}
+ #sidebar #worldButtons{flex:0 0 235px;width:235px!important}
+ #sidebar .hudHeroPanel{grid-template-columns:70px minmax(95px,1fr)}
+ #sidebar .hudStats{display:none}
+ #status{top:65px}
+}
+@media(max-width:780px){
+ #header #bottomBar{padding:0 5px!important;gap:3px!important}
+ #resources .chip .lbl{display:none!important}
+ #resources .chip b{font-size:12px}
+ #resources .chip{padding:0 3px!important}
+ #sidebar{height:180px!important;padding:4px!important;gap:4px!important}
+ #sidebar #minimap{flex:0 0 110px;width:110px!important}
+ #sidebar #minimap .mapSite .siteText{display:none}
+ #sidebar #minimap .mapSite{min-height:28px!important}
+ #sidebar #worldButtons{flex:0 0 148px;width:148px!important;gap:2px!important}
+ #sidebar #worldButtons>button{font-size:9px!important;border-width:2px!important}
+ #sidebar #worldButtons>button .ic{height:25px!important;width:25px!important}
+ #sidebar #armyPanel{min-width:0!important;flex:1!important}
+ #sidebar .hudHeroPanel{grid-template-columns:48px minmax(0,1fr);gap:4px}
+ #sidebar .hudPortrait{border-width:2px}
+ .hudIdentity h2{font-size:17px}
+ .hudMeter{height:19px;margin-top:3px}
+ .hudLocation{font-size:10px;margin:2px 0}
+ #info{width:min(340px,95vw)!important;bottom:190px!important;max-height:calc(100vh - 270px)!important}
+ #threatPop{max-height:calc(100vh - 270px)!important}
+}
