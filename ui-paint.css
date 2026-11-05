@@ -200,3 +200,67 @@
  #bottomBar #threatChip{font-size:13px!important}
  #bottomBar #btnNews{font-size:13px!important}
 }
+
+/* Larger, genuinely readable WC3-like minimap.
+   The recruitment destination control no longer covers any map pixels. */
+#sidebar {
+ height:clamp(238px,27vh,275px)!important;
+}
+#sidebar #minimap{
+ flex:0 0 clamp(270px,24vw,345px)!important;
+ width:clamp(270px,24vw,345px)!important;
+ height:100%!important;
+ min-width:0!important;
+ display:flex!important;
+ flex-direction:column!important;
+ gap:0!important;
+ overflow:hidden!important;
+}
+#sidebar #minimap canvas{
+ display:block!important;
+ flex:1 1 auto!important;
+ min-height:0!important;
+ height:calc(100% - 44px)!important;
+ width:100%!important;
+ max-width:100%!important;
+}
+#sidebar #minimap .mapSite{
+ display:flex!important;
+ position:relative!important;
+ inset:auto!important;
+ left:auto!important;right:auto!important;bottom:auto!important;
+ width:100%!important;
+ flex:0 0 44px!important;
+ height:44px!important;
+ margin:0!important;
+ border-top:3px ridge #b6945a!important;
+ border-right:0!important;border-bottom:0!important;border-left:0!important;
+ box-shadow:inset 0 2px 4px #0007!important;
+}
+#sidebar #armyPanel{min-width:0!important}
+#info{
+ bottom:calc(clamp(238px,27vh,275px) + 12px)!important;
+ max-height:calc(100vh - clamp(238px,27vh,275px) - 110px)!important;
+}
+#threatPop{max-height:calc(100vh - clamp(238px,27vh,275px) - 90px)!important}
+@media(max-width:1300px){
+ #sidebar #minimap{
+  flex:0 0 clamp(235px,23vw,295px)!important;
+  width:clamp(235px,23vw,295px)!important;
+ }
+ #sidebar #worldButtons{flex:0 0 265px!important;width:265px!important}
+}
+@media(max-width:1050px){
+ #sidebar{height:225px!important}
+ #sidebar #minimap{flex:0 0 220px!important;width:220px!important}
+ #sidebar #worldButtons{flex:0 0 212px!important;width:212px!important}
+ #info{bottom:237px!important;max-height:calc(100vh - 330px)!important}
+}
+@media(max-width:780px){
+ #sidebar{height:186px!important}
+ #sidebar #minimap{flex:0 0 132px!important;width:132px!important}
+ #sidebar #minimap .mapSite{flex-basis:34px!important;height:34px!important}
+ #sidebar #minimap .mapSite .siteText{display:none!important}
+ #sidebar #worldButtons{flex:0 0 148px!important;width:148px!important}
+ #info{bottom:194px!important;max-height:calc(100vh - 270px)!important}
+}
