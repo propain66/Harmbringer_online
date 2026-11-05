@@ -268,8 +268,9 @@
   .dmgText.heal { color: #1f6a2a; }
   #edgeTip { position: absolute; padding: 2px 8px; font-size: 13px; pointer-events: none; z-index: 7; }
 </style>
-<link rel="stylesheet" href="ui.css?v=2"><link rel="stylesheet" href="ui-wc3.css?v=1">
+<link rel="stylesheet" href="ui.css?v=2"><link rel="stylesheet" href="ui-wc3.css?v=1"><link rel="stylesheet" href="ui-paint.css?v=1">
 <script defer src="ui-art.js?v=1"></script>
+<script defer src="ui-paintings.js?v=1"></script>
 <!-- Game data: classic scripts, loaded before the game module -->
 <!-- ?v=… forces browsers (GitHub Pages caches 10 min) to load data that matches this index.html.
      Bump it whenever a data format changes. -->
@@ -291,7 +292,7 @@
 <!-- World HUD in the manner of Heroes of Might and Magic: a sidebar on the right (minimap, armies,
      actions, army details) and a bar at the bottom (resources, threat, time). -->
 <div id="header" class="hidden" role="region" aria-label="Kampagnenübersicht">
-  <div id="bottomBar" class="panel">
+  <div id="bottomBar" class="panel"><div id="hbBrand" aria-hidden="true"><span>Harmbringer</span><small>☠</small></div>
     <div id="resources" role="group" aria-label="Ressourcen und Kommando"></div>
     <button id="threatChip" title="Bedrohung der Fraktionen (Klick für alle)"></button>
     <button id="btnNews" title="Chronik: alle Meldungen der Welt (N)">📜 Chronik</button>
@@ -299,7 +300,7 @@
     <div id="status"><div id="dial"></div><div id="dayNo"></div><div id="clock"></div><div id="date" class="small"></div></div>
     <div id="timeDelta"></div>
   </div>
-  <div id="threatPop" class="panel hidden"><h3>Bedrohung</h3><div id="threats"></div>
+  <div id="threatPop" class="panel hidden"><h3>⚑ Fraktionen</h3><div id="threats"></div>
     <p class="small">Ab 50 % sind die Wachen alarmiert. Truppen: verbleibende Einheiten im Verhältnis zum ursprünglichen Bestand.</p></div>
   <div id="menuPop" class="panel hidden">
     <button id="btnSound" title="Ton an/aus (Taste M)">Ton: aus</button>
@@ -313,7 +314,7 @@
   <div class="sidebarBrand"><span>Harmbringer</span><small>Die Chronik des Lichs</small></div>
   <div id="minimap" class="hidden"><canvas id="miniMap" title="Klick: Kamera dorthin · Mausrad: Zoom"></canvas>
   <div class="zoom"><button id="miniIn" title="Hineinzoomen">+</button><button id="miniOut" title="Herauszoomen">−</button><button id="miniMode">◎</button></div>
-  <div class="zoomLabel" id="miniZoom">1×</div><button id="btnRecruitSite" class="mapSite" title="Nächsten Rekrutierungsort auf der Karte auswählen (R)">» Grabstätte</button></div>
+  <div class="zoomLabel" id="miniZoom">1×</div><button id="btnRecruitSite" class="mapSite" title="Nächsten Rekrutierungsort auf der Karte anzeigen (R)"><span class="siteIcon">⌖</span><span class="siteText"><strong>Grabstätten suchen</strong><small>Nächsten Ort zeigen</small></span></button></div>
   <div id="worldButtons" class="hidden" role="group" aria-label="Kampagnenaktionen">
     <button id="btnHome" title="Zum Hügelgrab (H)"><span class="ic sigilIcon" data-sigil="home"></span>Hügelgrab</button>
     <button id="btnRecruitLocal" title="Am aktuellen Ort Untote rekrutieren" disabled><span class="ic sigilIcon" data-sigil="recruit"></span>Rekrutieren</button>
@@ -5585,6 +5586,7 @@ const UI = {
     $('resources').innerHTML = chip('corpses', r.corpses, 'Leichen') + chip('bones', r.bones, 'Knochen') + chip('souls', r.souls, 'Seelen')
       + chip('knowledge', r.knowledge, 'Wissen') + chip('command', `${used}/${lim}`, 'Kommando', used >= lim ? 'full' : '');
     this.buildBadge(); this.newsBadge();
+    this.updateRecruitDestination();
     const localRecruit = $('btnRecruitLocal');
     if (localRecruit) { const can = game.mode === 'world' && Recruitment.canRecruitAt(Campaign.armyNode()); localRecruit.disabled = !can; localRecruit.title = can ? `In ${Campaign.armyNode().name} rekrutieren` : 'Nur an eroberten Rekrutierungsorten möglich; Karte: » Grabstätte'; }
     // Threat: one chip (mini bars + the highest faction), the full list on click.
@@ -5701,19 +5703,45 @@ const UI = {
     game.view.cam.lookAtTile(node.q, node.r);
     this.selectNode(node.id);
   },
-  // Recruiting sites sorted by travel time from the army; repeated clicks step through them.
-  findRecruitSite() {
+  // The map marker is a destination finder, distinct from recruiting at the current place.
+  recruitDestinations() {
     const here = Campaign.armyNode();
-    const sites = DATA.nodes.filter(n => Recruitment.canRecruitAt(n))
-      .sort((a, b) => Campaign.travelDays(here, a) - Campaign.travelDays(here, b) || hexDistance(here.q, here.r, a.q, a.r) - hexDistance(here.q, here.r, b.q, b.r));
-    if (!sites.length) return;
-    const fresh = this.recruitCycleFrom !== here.id || performance.now() - (this.recruitCycleAt || 0) > 8000;
-    this.recruitCycle = fresh ? 0 : (this.recruitCycle + 1) % sites.length;
-    this.recruitCycleFrom = here.id; this.recruitCycleAt = performance.now();
-    const n = sites[this.recruitCycle];
+    return DATA.nodes.filter(n => Recruitment.canRecruitAt(n))
+      .sort((a,b) => Campaign.travelDays(here,a)-Campaign.travelDays(here,b) || hexDistance(here.q,here.r,a.q,a.r)-hexDistance(here.q,here.r,b.q,b.r));
+  },
+  updateRecruitDestination() {
+    const btn = $('btnRecruitSite'); if (!btn || !game.campaign) return;
+    const here = Campaign.armyNode(), atSite = Recruitment.canRecruitAt(here);
+    const sites = this.recruitDestinations().filter(n => n.id !== here.id);
+    btn.classList.toggle('atSite',!!atSite);
+    btn.disabled = atSite || !sites.length;
+    if (atSite) {
+      btn.innerHTML = '<span class="siteIcon">✓</span><span class="siteText"><strong>Du bist schon hier</strong><small>Rekrutieren unten rechts</small></span>';
+      btn.title = 'An diesem Ort kann rekrutiert werden. Nutze den Rekrutieren-Befehl rechts unten.';
+    } else if (!sites.length) {
+      btn.innerHTML = '<span class="siteIcon">⚑</span><span class="siteText"><strong>Keine Grabstätte</strong><small>Erst Orte erobern</small></span>';
+      btn.title = 'Noch kein Rekrutierungsort zugänglich';
+    } else {
+      const n=sites[0],d=Campaign.travelDays(here,n);
+      btn.innerHTML = '<span class="siteIcon">⌖</span><span class="siteText"><strong>Grabstätte finden</strong><small>'+esc(n.name)+' · '+d+' '+(d===1?'Tag':'Tage')+'</small></span>';
+      btn.title = 'Nächstes Rekrutierungsziel: '+n.name+' · '+d+' '+(d===1?'Tag':'Tage')+'. Klick: auf der Karte zeigen, erneut: nächster Ort. R';
+    }
+  },
+  findRecruitSite() {
+    if (game.mode !== 'world') return;
+    const here = Campaign.armyNode();
+    if (Recruitment.canRecruitAt(here)) {
+      this.toast('Du bist bereits in '+here.name+'. Unten rechts kannst du direkt rekrutieren.',3.8,false);
+      this.updateRecruitDestination(); return;
+    }
+    const sites=this.recruitDestinations().filter(n=>n.id!==here.id);
+    if (!sites.length) { this.toast('Noch keine Grabstätten zugänglich.',3,false);return; }
+    const fresh=this.recruitCycleFrom!==here.id || performance.now()-(this.recruitCycleAt||0)>8000;
+    this.recruitCycle=fresh?0:(this.recruitCycle+1)%sites.length;
+    this.recruitCycleFrom=here.id;this.recruitCycleAt=performance.now();
+    const n=sites[this.recruitCycle],d=Campaign.travelDays(here,n);
     this.focusNode(n);
-    const d = Campaign.travelDays(here, n);
-    this.toast(`${n.name}: ${n.id === here.id ? 'Armee steht hier' : d + (d === 1 ? ' Tag' : ' Tage') + ' entfernt'} (${this.recruitCycle + 1}/${sites.length})`, 3.5, false);
+    this.toast('Grabstätte: '+n.name+' ('+d+' '+(d===1?'Tag':'Tage')+' entfernt) · Zum Reisen „Hierher ziehen“ wählen. ('+(this.recruitCycle+1)+'/'+sites.length+')',5,false);
   },
   // Mouse-over help for the resources in the header: how to get them and what they are for.
   resourceTip(k) {
@@ -5809,23 +5837,39 @@ const UI = {
     el.innerHTML = `Runde ${n}<div class="sub">${sub || (T ? T.name + (T.foggy ? ', Nebel' : '') : '')}</div>`;
     el.classList.add('on'); clearTimeout(this.rbTimer); this.rbTimer = setTimeout(() => el.classList.remove('on'), 1400);
   },
-  // Army panel (sidebar): one row per army (leader portrait, place, order), below the cards of the chosen one.
+  // Warcraft-style hero panel. Other armies stay selectable via the compact row above it.
   renderArmies() {
-    const el = $('armyPanel'); if (!el || !game.campaign) return;
-    const all = Expeditions.all();
-    $('btnGo').classList.toggle('hidden', !Expeditions.hasOrders() && !game.campaign.march);
-    $('btnGo').innerHTML = (game.campaign.march ? 'Weiterziehen' : 'Los – Befehle ausführen') + '<kbd>G</kbd>';
-    if (!all.some(a => a.id === this.activeArmy)) this.activeArmy = 'lich';
-    const act = Expeditions.active();
-    const row = a => {
-      const lead = a.id === 'lich' ? 'lich' : a.exp.leader, d = DATA.units[lead];
-      const cmd = a.id === 'lich' ? `${Campaign.commandUsed()}/${Campaign.commandLimit()}` : `${Expeditions.command(a.army)}/${EXPEDITION.commandLimit}`;
-      return `<div class="armyRow ${a.id === act.id ? 'on' : ''}" data-army="${a.id}" title="Klick: auswählen, Kamera dorthin">${portraitHtml(lead, d)}
-        <div class="rTxt"><div><b>${esc(a.label)}</b> · ${a.army.length} Untote · ${resIcon('command', 13)}${cmd}</div>
-        <div>${game.mode === 'travel' && a.id === 'lich' ? 'unterwegs' : esc(a.node.name)}${a.order ? ' → <b>' + esc(NODE_BY_ID[a.order].name) + '</b>' : ''}</div></div></div>`;
-    };
-    el.innerHTML = `<div class="armyRows">${all.map(row).join('')}</div><div class="armyCards">${this.armyCards(act.army)}</div>`;
-    el.querySelectorAll('[data-army]').forEach(b => b.onclick = () => { this.activeArmy = b.dataset.army; const a = Expeditions.active(); this.focusNode(a.node); this.renderArmies(); Expeditions.syncView(); });
+    const el=$('armyPanel'); if (!el || !game.campaign) return;
+    const all=Expeditions.all();
+    $('btnGo').classList.toggle('hidden',!Expeditions.hasOrders()&&!game.campaign.march);
+    $('btnGo').innerHTML = (game.campaign.march ? 'Weiterziehen' : 'Los – Befehle ausführen')+'<kbd>G</kbd>';
+    if (!all.some(a=>a.id===this.activeArmy)) this.activeArmy='lich';
+    const act=Expeditions.active(),isLich=act.id==='lich';
+    const lead=isLich?'lich':act.exp.leader,unit=DATA.units[lead],l=Campaign.lichStats();
+    const buffs=Upgrades.mods(lead),lvl=isLich?l.level:1;
+    const hp=isLich?l.hp:unit.hp,damage=isLich?l.damage:unit.damage;
+    const shield=isLich?l.shield:(unit.soulShield||0)+buffs.shield;
+    const cur=act.army.find(u=>u.type===lead)?.hp||unit.hp;
+    const hpPct=isLich?Math.max(0,Math.min(100,cur/unit.hp*100)):100;
+    const ico=(key)=>window.HARMBRINGER_UI_ART ? HARMBRINGER_UI_ART.stat(key) : '✦';
+    const row=a=>`<button class="hudArmyPill ${a.id===act.id?'active':''}" data-army="${a.id}" title="Armee wählen · ${esc(a.node.name)}">${esc(a.label)} <small>${a.army.length} Untote</small></button>`;
+    const stats=(key,name,v)=>`<div class="hudStat">${ico(key)}<span>${name}</span><b>${esc(String(v))}</b></div>`;
+    el.innerHTML=`<div class="hudArmyStrip">${all.map(row).join('')}</div>
+      <div class="hudHeroPanel">
+        <div class="hudPortrait">${portraitHtml(lead,unit)}</div>
+        <div class="hudIdentity"><h2>${esc(unit.name)} <small>Stufe ${lvl}</small></h2>
+          <div class="hudLocation">${esc(act.node.name)} · ${act.army.length} Untote</div>
+          <div class="hudMeter hp"><span style="width:${hpPct}%"></span><b>❤ ${Math.round(cur/unit.hp*hp)} / ${hp}</b></div>
+          ${isLich?`<div class="hudMeter soul"><span style="width:100%"></span><b>✦ Seelenschild ${shield}</b></div>`:''}
+        </div>
+        <div class="hudStats">${stats('damage','Schaden',damage)}${stats('hp','LP',hp)}
+          ${stats('initiative','Ini',unit.initiative+buffs.ini)}${stats('move','Bew',unit.move)}
+          ${stats('range','Reichweite',unit.range)}${stats('armor','Rüstung',DEFENSE_NAMES[unit.defense])}</div>
+      </div>`;
+    el.querySelectorAll('[data-army]').forEach(b=>b.onclick=()=>{
+      this.activeArmy=b.dataset.army; const a=Expeditions.active();
+      this.focusNode(a.node);this.renderArmies();Expeditions.syncView();
+    });
   },
   renderInfo() {
     this.layoutInfo();
