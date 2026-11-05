@@ -1,0 +1,37 @@
+/* Original compact game illustrations: building scenes and carved action emblems. */
+(function(){
+'use strict';
+const buildings={
+phylactery:'<path d="M70 170V90Q70 12 160 13q90 0 90 77v80" fill="#61514c" stroke="#a88d6d" stroke-width="13"/><path d="M94 170V97q0-63 66-64 66 1 66 64v73" fill="#241b2b" stroke="#85745e" stroke-width="6"/><path d="M130 145V91h60v54z" fill="#b99b62" stroke="#dfc18c" stroke-width="5"/><path d="M130 109h60m-45-18v54m30-54v54" stroke="#54402d" stroke-width="4"/><path d="M160 89l-18 30 18 32 18-32z" fill="#a653c7" stroke="#ecb8ff" stroke-width="4" class="glow"/><path d="M106 142v24m-7-27h14m101 3v24m-7-27h14" stroke="#e3b77c" stroke-width="5"/><path d="M106 138q-12-12 0-26 12 14 0 26m108 0q-12-12 0-26 12 14 0 26" fill="#ffa44f" stroke="#ffcc72" stroke-width="3" class="glow"/>',
+boneWorkshop:'<path d="m51 79 109-66 110 66v103H51z" fill="#775039" stroke="#493127" stroke-width="9"/><path d="M35 81 160 5 285 81" fill="none" stroke="#c09e72" stroke-width="12"/><path d="M74 82v102m36-102v102m100-102v102m36-102v102M55 109h212" stroke="#332621" stroke-width="10"/><path d="M140 180V96h40v84" fill="#211c1d" stroke="#b49874" stroke-width="5"/><path d="M98 126l22 24m2-25-24 26m101-26 23 25m0-24-24 25" stroke="#e3d8b4" stroke-width="7"/><circle cx="110" cy="123" r="7" fill="#eee0c2"/><circle cx="210" cy="124" r="7" fill="#eee0c2"/>',
+corpsePit:'<path d="M46 110q114-70 228 0l-15 67H61z" fill="#69513b" stroke="#957b59" stroke-width="8"/><ellipse cx="160" cy="144" rx="98" ry="38" fill="#1c1716" stroke="#827054" stroke-width="10"/><path d="M64 117V46m38 66V42m38 63V39m66 64V41m39 69V45m-192 19h215m-215 22h215" stroke="#443225" stroke-width="9"/><path d="M144 157l-10-46-6-30q6-8 11 1l12 24-1-44q8-6 11 3l4 36 7-36q8-4 9 5l-2 44 10-18q8 0 6 9l-20 51" fill="#8c8576" stroke="#c0b39c" stroke-width="4"/>',
+soulKennel:'<path d="M90 176V70q70-81 140 0v106" fill="#514353" stroke="#a68d6f" stroke-width="10"/><path d="M110 175V69q50-60 100 0v106" fill="#18232b" stroke="#a5977a" stroke-width="5"/><path d="M127 173V49m33 123V34m33 139V49M97 97h126m-126 44h126" stroke="#806f60" stroke-width="9"/><path d="M156 154q-42-30-10-75 2 31 21 28 17-25 7-41 52 52 2 94 9-29-18-25z" fill="#6bbed1" class="glow" stroke="#b4f5fa" stroke-width="3"/>',
+deadHall:'<path d="m50 80 110-65 110 65v99H50z" fill="#7f674e" stroke="#544030" stroke-width="8"/><path d="M36 85 160 8 284 85" stroke="#b49b70" stroke-width="11" fill="none"/><path d="M76 91v88m27-88v88m114-88v88m28-88v88M66 116h188" stroke="#493529" stroke-width="9"/><path d="M128 180v-57q33-40 64 0v57" fill="#271c20" stroke="#bb9872" stroke-width="7"/><path d="M158 157l-9-23 12-21 11 21z" fill="#d48742" class="glow"/>',
+knowledgeAltar:'<path d="M44 180h230v-23H44z" fill="#83664b" stroke="#443327" stroke-width="6"/><path d="M85 157V91l74 20v50zm75-46 77-20v66l-77 4z" fill="#e4ca91" stroke="#ad8a5e" stroke-width="6"/><path d="m103 112 38 9m-38 8 38 8m38-16 39-9m-39 24 39-10M160 111v51" stroke="#95714b" stroke-width="4"/><path d="M65 151V73m190 78V73" stroke="#ae865d" stroke-width="7"/><path d="M65 70q-12-20 0-34 17 16 0 34m190 0q-12-20 0-34 17 16 0 34" fill="#ffad4b" class="glow" stroke="#f5cc7a" stroke-width="3"/>',
+boneForge:'<path d="M72 181V94q2-76 88-76t88 76v87" fill="#7d6b56" stroke="#ad9f83" stroke-width="11"/><path d="M103 181V99q2-49 57-49t57 49v82" fill="#2f2422" stroke="#c5a782" stroke-width="7"/><path d="M123 181V97q36-38 74 0v84" fill="#b05f30"/><path d="M148 177q-31-35 9-86 0 35 20 39 15-22 8-36 39 54-6 84" fill="#f8b246" class="glow" stroke="#ffe2a0" stroke-width="4"/><path d="M215 155h65v14h-52l-9 17h-42v-17h-19v-14z" fill="#65615c" stroke="#acaaa0" stroke-width="4"/>',
+heathAltar:'<path d="m40 178 24-117 34-17 26 134m75 0 24-119 34 9 25 110M130 179l-8-90 34-24 24 20 10 94" fill="#8b8972" stroke="#bbba9c" stroke-width="8"/><path d="M160 158q-37-40-10-79 4 23 21 21 12-21 3-31 40 47 3 89" fill="#ba7acf" class="glow" stroke="#edb5ff" stroke-width="4"/><path d="M19 186q87-25 145 0 73-23 139 0" stroke="#4c6542" stroke-width="13" fill="none"/><path d="m66 176-10-28m34 29 2-32m130 32 7-31m31 33-7-27" stroke="#d79bb8" stroke-width="6"/>'
+};
+const actions={
+home:'<path d="M11 35 32 10 53 35v20H11zM22 55V39q10-13 20 0v16" fill="#78654f" stroke="#e2c58d" stroke-width="4"/><path d="M32 15V4m-8 5h16" stroke="#c3a56b" stroke-width="3"/>',
+recruit:'<path d="M9 54V26q8-18 18 0v28m10 0V26q8-18 18 0v28" fill="#706450" stroke="#ddc8a3" stroke-width="4"/><circle cx="18" cy="17" r="10" fill="#e8d6b3" stroke="#513e38" stroke-width="3"/><circle cx="46" cy="17" r="10" fill="#e8d6b3" stroke="#513e38" stroke-width="3"/><path d="M13 16h10m18 0h10M32 7v50" stroke="#423029" stroke-width="3"/>',
+build:'<path d="m11 52 33-34m-7-7 12-9 14 14-10 9z" fill="#a69a85" stroke="#e5ca9e" stroke-width="4"/><path d="M13 50h44v10H13zm10-17h26v17H23z" fill="#7c6956" stroke="#c7a979" stroke-width="3"/>',
+inventory:'<path d="M13 25q0-20 19-20t19 20v32H13z" fill="#885c37" stroke="#dfb778" stroke-width="4"/><path d="M12 31h40M22 9v48m20-48v48M24 35h16v14H24z" stroke="#543726" stroke-width="4"/><path d="M30 38h4v9h-4z" fill="#d8ba6d"/>',
+rest:'<path d="M4 55 30 15 59 55z" fill="#82654d" stroke="#ccab7b" stroke-width="4"/><path d="m30 15 8 40H19z" fill="#2c2930" stroke="#b9a286" stroke-width="3"/><path d="M32 35q-15-8-10 7l10 15 11-15q2-13-11-7z" fill="#f1af54" class="glow" stroke="#ffdd9b" stroke-width="3"/>',
+menu:'<path d="M10 10h44v44H10z" fill="#59412c" stroke="#c59b61" stroke-width="4"/><path d="M19 21h26m-26 11h26m-26 11h26" stroke="#e8ca8b" stroke-width="5"/>'
+};
+function building(key){
+ const id='paint'+key,scene=buildings[key]||buildings.phylactery;
+ return '<svg class="hbPainting" viewBox="0 0 320 195" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><defs>'+
+  '<linearGradient id="'+id+'" x2="0" y2="1"><stop stop-color="#383137"/><stop offset="1" stop-color="#897254"/></linearGradient>'+
+  '<filter id="'+id+'noise"><feTurbulence type="fractalNoise" baseFrequency=".5" numOctaves="3" seed="4"/><feColorMatrix type="saturate" values="0"/><feComponentTransfer><feFuncA type="linear" slope=".12"/></feComponentTransfer></filter></defs>'+
+  '<rect width="320" height="195" fill="url(#'+id+')"/><path d="M0 180q50-30 115-10t205-3v28H0z" fill="#5c503f"/>'+
+  '<g stroke-linejoin="round" stroke-linecap="round">'+scene+'</g><rect width="320" height="195" filter="url(#'+id+'noise)"/>'+
+  '<path d="M3 3h314v189H3z" fill="none" stroke="#29211c" stroke-width="7"/><path d="M8 8h304v179H8z" fill="none" stroke="#bc9965" stroke-width="3"/>'+
+  '<path d="M10 10h16v16H10zm284 0h16v16h-16zM10 170h16v16H10zm284 0h16v16h-16z" fill="#343037" stroke="#cbb080" stroke-width="2"/></svg>';
+}
+function action(key){return '<span class="paintActionIcon"><svg viewBox="0 0 64 64" xmlns="http://www.w3.org/2000/svg" aria-hidden="true"><rect width="64" height="64" fill="#211a1b"/><circle cx="32" cy="32" r="28" fill="#4d372d" stroke="#916e48" stroke-width="2"/>'+
+(actions[key]||actions.menu)+'<path d="M3 3h58v58H3z" fill="none" stroke="#c4a16f" stroke-width="3"/></svg></span>';}
+window.HARMBRINGER_PAINT=Object.freeze({building,action});
+function paintButtons(){document.querySelectorAll('.sigilIcon[data-sigil]').forEach(el=>{el.innerHTML=action(el.dataset.sigil);});}
+if(document.readyState==='loading')document.addEventListener('DOMContentLoaded',paintButtons,{once:true});else paintButtons();
+})();
