@@ -268,7 +268,7 @@
   .dmgText.heal { color: #1f6a2a; }
   #edgeTip { position: absolute; padding: 2px 8px; font-size: 13px; pointer-events: none; z-index: 7; }
 </style>
-<link rel="stylesheet" href="ui-unified.css?v=1">
+<link rel="stylesheet" href="ui-unified.css?v=2">
 <script defer src="ui-art.js?v=1"></script>
 <script defer src="ui-paintings.js?v=1"></script>
 <!-- Game data: classic scripts, loaded before the game module -->
@@ -2039,7 +2039,7 @@ const Base = {
       <div class="stickyRes">${resSummary(c.resources)}</div>
       <div class="buildScreen">
         <section class="buildingSelection" aria-label="Gebäudeübersicht"><h3>Gebäude des Hügelgrabs</h3><div class="buildingTileGrid">${buildingTiles}</div></section>
-        <section class="buildingInspector" aria-label="Gebäudedetails"><div class="buildingHeroArt">${art(sel)}</div>
+        <section class="buildingInspector" aria-label="Gebäudedetails"><div class="buildingHeroArt" data-building="${sel}">${art(sel)}</div>
           <h3>${esc(B.name)} <small>Stufe ${L} / ${B.levels.length}</small></h3>
           <div class="buildingFact"><b>Aktuell</b><span>${current}</span></div>
           <div class="buildingFact next"><b>${next ? 'Ausbau auf Stufe '+(L+1) : 'Vollendet'}</b><span>${upcoming}</span></div>
