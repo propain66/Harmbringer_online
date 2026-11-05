@@ -275,3 +275,115 @@ kbd { font-size: 11px; line-height: 16px; border-radius: 3px; opacity: .8; }
   button, #toast, #narrator { transition: none; }
   .modal { backdrop-filter: none; }
 }
+
+
+/* THE OSSUARY: medieval-dark UI skin. Legibility remains paramount. */
+:root{
+ --parchment:#d2c0a0;--parchment-dark:#bba581;--ink:#291f19;--ink-soft:#5f4c40;
+ --undead:#785b90;--gold:#ab8848;--ui-line:rgba(70,47,31,.37);
+ --ui-paper:#e2d4b5;--ui-font:Georgia,"Times New Roman",serif;
+}
+#sidebar{
+ background:repeating-linear-gradient(92deg,transparent 0 24px,#24140d0b 25px 27px),linear-gradient(90deg,#221b1a,#403228 6%,#413328 94%,#1b1515)!important;
+ color:#eee0c7;border-left:5px ridge #7d6241;box-shadow:inset 0 0 0 2px #171012, -7px 0 30px #0008;
+}
+.sidebarBrand{border-bottom:2px solid #92734a!important;text-align:center}
+.sidebarBrand>span{color:#dbc8a5;font-size:30px;text-shadow:0 2px 1px #060305,0 0 16px #6e477977}
+.sidebarBrand small{color:#bfae8d}
+#sidebar #minimap{border:3px ridge #786244;border-radius:2px}
+#worldButtons{gap:6px}
+#worldButtons button{
+ background:linear-gradient(165deg,#483b31,#211c1d 80%)!important;
+ color:#e8d8bd;border:2px ridge #806744;border-radius:2px!important;
+ box-shadow:inset 0 0 0 1px #140e10,0 2px 5px #0008!important;
+ text-shadow:0 1px 2px #000;font-family:Georgia,serif;
+}
+#worldButtons button:hover:not(:disabled){background:linear-gradient(#61503d,#342a30)!important;border-color:#c6a06b;filter:brightness(1.13)}
+#worldButtons button:focus-visible{outline:3px solid #c9a15b;outline-offset:2px}
+#worldButtons button .ic{display:block;width:37px;height:37px;margin:0 auto 1px}
+#worldButtons #btnGo{background:linear-gradient(#6a4d64,#35263e)!important;border-color:#a18b68}
+.sigilSvg,.buildingSvg,.statSvg{width:100%;height:100%;display:block;fill:none;stroke:#d3c2a2;stroke-width:2.6;stroke-linecap:round;stroke-linejoin:round}
+.sigilSvg .soul,.buildingSvg .soul{stroke:#b195c2;fill:#65507855}
+.buildingSvg .etch{stroke:#776749;stroke-width:.8;opacity:.46}
+.statSvg{stroke:#735a41;stroke-width:2.1}
+.statSvg .solid,.statSvg .dot{fill:#9f4c4d;stroke:none}
+#worldButtons .badge{background:#553554;border:1px solid #c0a17e;color:#f1e2d4}
+#armyPanel{border-top:2px solid #907149}
+.armyRow,.aCard{background:#2d2624!important;border:1px solid #776146!important;border-radius:2px!important;color:#eadabe}
+.armyRow.on,.aCard.lich{background:#453443!important;border-color:#b99a63!important}
+.armyRow .rTxt,.aStats{color:#c8b89c}
+.armyRow .rTxt b,.aName{color:#f0e0ca}
+#bottomBar{background:linear-gradient(#493b30,#2a2323)!important;border-top:3px ridge #8e714b;color:#e8d7b7;box-shadow:0 -3px 15px #0008}
+#resources .chip b{color:#d6b57c}
+#resources .chip .lbl{color:#c9ba9e}
+#status,#dayNo,#clock{color:#eadbc2}
+#threatChip,#btnNews{background:linear-gradient(#57483b,#302923);color:#eed9ba;border:1px ridge #8e7755}
+#info,.modal .panel,#threatPop,#menuPop{
+ background:repeating-linear-gradient(0deg,#624d2706 0 3px,transparent 4px 9px),linear-gradient(145deg,#e6d8b8,#cdb993)!important;
+ border:4px ridge #876b48!important;border-radius:3px!important;
+ box-shadow:inset 0 0 0 2px #4b3727,0 14px 35px #08050599!important;color:#30241c;
+}
+.modal{background:#0b0911b9}
+.modal .panel{max-width:760px}
+.modal .panel.wide{max-width:1120px}
+.modal h2,#info h2,#threatPop h3{font:normal 29px/1.2 "IM Fell English",Georgia,serif;color:#442a36;border-bottom:2px solid #a58d60}
+.modal button:not(.primary),#info button{background:linear-gradient(#e2d3b2,#bda782);border:1px solid #826949;color:#2f221a;border-radius:2px}
+.modal button:hover:not(:disabled),#info button:hover:not(:disabled){background:#ead8ae}
+.modal button.primary,.modal button[data-build]:not(:disabled){background:linear-gradient(#62445c,#3c3043);color:#f4e9d4;border:1px solid #8e7354}
+.stickyRes{background:#d6c5a4!important;border-bottom:2px solid #9d8761!important}
+#threatPop{width:min(440px,calc(100vw - var(--side) - 22px));padding:14px 17px}
+#threatPop .threat{
+ display:grid;grid-template-columns:minmax(0,1fr) auto;
+ gap:5px 8px;margin:0;padding:12px 2px;
+ border-bottom:1px solid #856f5044;font:15px/1.25 Georgia,serif
+}
+#threatPop .threatName{font-weight:bold;color:#38281f;min-width:0;overflow-wrap:anywhere}
+#threatPop .threatName:before{content:"";display:inline-block;width:9px;height:9px;margin-right:7px;border:1px solid #3d2930;background:var(--faction)}
+#threatPop .threatRisk{font-weight:bold;color:#795637;text-align:right}
+#threatPop .threat.hot .threatRisk{color:#a3312a}
+#threatPop .threatSoldiers{grid-column:1/-1;color:#554333;font-size:13px}
+#threatPop .threat .bar{grid-column:1/-1;height:4px;border:0;margin:0;background:#9a886d66}
+#threatPop .threat.dead{text-decoration:none;opacity:.53}
+#threatPop .threat.dead .threatName{text-decoration:line-through}
+#threatPop>p.small{font-size:12px}
+.buildRow{display:grid;grid-template-columns:110px minmax(0,1fr) 112px;gap:16px;align-items:start;padding:20px 0;border-bottom:1px solid #87735166}
+.buildPortrait{height:104px;width:104px;padding:10px;background:radial-gradient(#4a3a38,#1d1b21);border:4px ridge #9c8157;box-shadow:inset 0 0 14px #0009}
+.buildingSvg{stroke:#cfc0a0;stroke-width:2.8}
+.buildDetails{min-width:0}
+.buildRow .bHead{display:flex;align-items:baseline;justify-content:space-between;gap:8px;margin:0 0 9px}
+.buildRow .bHead b{font:normal 22px/1.1 "IM Fell English",Georgia,serif;color:#462d32}
+.buildingLvl{white-space:nowrap;font-size:12px;color:#6b5946}
+.buildBenefits{display:grid;grid-template-columns:106px minmax(0,1fr);gap:12px;line-height:1.4;margin:5px 0;font-size:14px}
+.benefitLabel{font-weight:bold;color:#67453d;font-size:12px;text-transform:uppercase;letter-spacing:.03em}
+.buildBenefits.upcoming{background:#eee2c477;padding:8px}
+.buildCost{font-size:13px;margin:9px 0;color:#4c372a}
+.buildingProgress{color:#813f37;font-weight:bold}
+.buildAction{display:flex;flex-direction:column;align-items:stretch;gap:6px;padding-top:4px;overflow-wrap:anywhere}
+.buildAction button{min-height:39px}
+.buildAction .small{font-size:11px}
+.buildingMax{font-size:12px;color:#576348}
+.upgrades{margin-top:12px}
+.recLayout{grid-template-columns:170px minmax(0,1fr)}
+.recSide{border-right:1px solid #9e865c;padding-right:12px;gap:8px}
+.recSide button{display:flex;align-items:center;justify-content:space-between;gap:9px;min-height:44px;text-align:left!important;padding:8px!important}
+.recSide button.on{background:#655068!important;color:#f0e2ca!important;outline:1px solid #a68b68!important}
+.groupCount{border-radius:2px;padding:2px 6px;background:#3b2b2b2b;font:12px Georgia,serif}
+.recruitRow{align-items:start}
+.recruitRow>div:nth-child(2){min-width:0}
+.recruitStatGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:5px 9px;margin:10px 0}
+.recruitStatGrid>span{display:grid;grid-template-columns:22px 1fr;grid-template-rows:18px 13px;column-gap:5px;align-items:center;background:#e2d4b88c;border:1px solid #a58b6444;padding:4px}
+.recruitStatGrid .statSvg{grid-row:1/3;width:22px;height:22px}
+.recruitStatGrid b{font:700 14px/1.1 Georgia,serif;color:#33251f;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.recruitStatGrid small{font:11px/1.1 Georgia,serif;color:#66513e}
+@media(max-width:850px){
+ .buildRow{grid-template-columns:72px minmax(0,1fr);gap:10px}
+ .buildPortrait{width:70px;height:70px;padding:6px}
+ .buildAction{grid-column:2;flex-direction:row;align-items:center}
+ .buildBenefits{grid-template-columns:1fr;gap:2px}
+ .recruitStatGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+}
+@media(max-width:760px){
+ .recSide{border-right:0;border-bottom:1px solid #9e865c;padding:0 0 10px}
+ .recSide h3{width:100%}
+ .recSide button{flex:1}
+}
