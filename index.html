@@ -268,7 +268,8 @@
   .dmgText.heal { color: #1f6a2a; }
   #edgeTip { position: absolute; padding: 2px 8px; font-size: 13px; pointer-events: none; z-index: 7; }
 </style>
-<link rel="stylesheet" href="ui.css?v=1">
+<link rel="stylesheet" href="ui.css?v=2">
+<script defer src="ui-art.js?v=1"></script>
 <!-- Game data: classic scripts, loaded before the game module -->
 <!-- ?v=… forces browsers (GitHub Pages caches 10 min) to load data that matches this index.html.
      Bump it whenever a data format changes. -->
@@ -299,7 +300,7 @@
     <div id="timeDelta"></div>
   </div>
   <div id="threatPop" class="panel hidden"><h3>Bedrohung</h3><div id="threats"></div>
-    <p class="small">Oberer Balken: Bedrohung. Unterer, roter Balken: wie viele Truppen der Fraktion noch leben (alle Orte und Trupps, gemessen am Anfang). Die Bedrohung steigt durch Angriffe auf Orte der Fraktion. Ab 50 % sind ihre Orte gewarnt: alle Wachen sofort alarmiert. Hohe Bedrohung schickt mehr Trupps aus.</p></div>
+    <p class="small">Ab 50 % sind die Wachen alarmiert. Truppen: verbleibende Einheiten im Verhältnis zum ursprünglichen Bestand.</p></div>
   <div id="menuPop" class="panel hidden">
     <button id="btnSound" title="Ton an/aus (Taste M)">Ton: aus</button>
     <button id="btnSaves" title="Spielstände: Plätze, Datei sichern und laden">Spielstände</button>
@@ -314,12 +315,12 @@
   <div class="zoom"><button id="miniIn" title="Hineinzoomen">+</button><button id="miniOut" title="Herauszoomen">−</button><button id="miniMode">◎</button></div>
   <div class="zoomLabel" id="miniZoom">1×</div></div>
   <div id="worldButtons" class="hidden" role="group" aria-label="Kampagnenaktionen">
-    <button id="btnHome" title="Zum Hügelgrab (H)"><span class="ic">⌂</span>Hügelgrab</button>
-    <button id="btnRecruitSite" title="Nächster Ort zum Rekrutieren, mehrmals klicken für die nächsten (R)"><span class="ic">☠</span>Rekrutieren</button>
-    <button id="btnBuild" title="Gebäude im Hügelgrab bauen – geht von überall (B)"><span class="ic">⚒</span>Bauen</button>
-    <button id="btnRest" title="Rasten bis zu einer Tageszeit – z. B. um nachts anzugreifen"><span class="ic">☾</span>Rasten</button>
-    <button id="btnInventory" title="Artefakte und besondere Orte (I)"><span class="ic">✦</span>Inventar</button>
-    <button id="btnMenu" title="Menü: Ton, Spielstände, Neues Spiel, Tastenkürzel"><span class="ic">☰</span>Menü</button>
+    <button id="btnHome" title="Zum Hügelgrab (H)"><span class="ic sigilIcon" data-sigil="home"></span>Hügelgrab</button>
+    <button id="btnRecruitSite" title="Nächster Ort zum Rekrutieren, mehrmals klicken für die nächsten (R)"><span class="ic sigilIcon" data-sigil="recruit"></span>Rekrutieren</button>
+    <button id="btnBuild" title="Gebäude im Hügelgrab bauen – geht von überall (B)"><span class="ic sigilIcon" data-sigil="build"></span>Bauen</button>
+    <button id="btnRest" title="Rasten bis zu einer Tageszeit – z. B. um nachts anzugreifen"><span class="ic sigilIcon" data-sigil="rest"></span>Rasten</button>
+    <button id="btnInventory" title="Artefakte und besondere Orte (I)"><span class="ic sigilIcon" data-sigil="inventory"></span>Inventar</button>
+    <button id="btnMenu" title="Menü: Ton, Spielstände, Neues Spiel, Tastenkürzel"><span class="ic sigilIcon" data-sigil="menu"></span>Menü</button>
     <button id="btnGo" class="primary hidden" title="Alle Befehle ausführen: die Zeit läuft für alle Armeen gleichzeitig (G)">Los</button>
   </div>
   <div id="armyPanel" class="hidden"></div>
@@ -2006,12 +2007,17 @@ const Base = {
       const L = this.level(k), next = B.levels[L], block = this.blocker(k);
       const have = B.levels.slice(0, L).map(l => [l.text, this.producesText(l)].filter(Boolean).join(' ')).join('<br>');
       const w = c.construction && c.construction.k === k ? ` · <b>im Bau: noch ${c.construction.daysLeft} ${c.construction.daysLeft === 1 ? 'Tag' : 'Tage'}</b>` : '';
-      // Name, level and the build button in one line; the text uses the full width below.
-      return `<div class="buildRow"><div class="bHead"><b>${B.name}</b> <span class="small">· Stufe ${L} / ${B.levels.length}${w}</span>
-          ${next ? `<span class="bBtn"><button data-build="${k}" ${block ? 'disabled' : ''} title="${block || ''}">${L ? 'Ausbauen' : 'Bauen'}</button>${block ? ` <span class="small">${esc(block)}</span>` : ''}</span>` : ''}</div>
-        ${have ? `<div class="small">${have}</div>` : ''}
-        ${next ? `<div class="small">Nächste Stufe: ${[next.text, this.producesText(next)].filter(Boolean).join(' ')} · Kosten: ${cost(next.cost)} · ${next.days} ${next.days === 1 ? 'Tag' : 'Tage'}</div>` : ''}
-        ${Upgrades.html(k)}</div>`;
+      const art = window.HARMBRINGER_UI_ART ? HARMBRINGER_UI_ART.building(k) : '⌂';
+      const current = have || (L ? 'Bereits errichtet.' : 'Noch nicht errichtet.');
+      const benefit = next ? [next.text, this.producesText(next)].filter(Boolean).join(' ') : 'Höchste Stufe erreicht.';
+      return `<div class="buildRow"><div class="buildPortrait" aria-hidden="true">${art}</div>
+        <div class="buildDetails"><div class="bHead"><b>${esc(B.name)}</b><span class="buildingLvl">Stufe ${L} / ${B.levels.length}</span></div>
+        <div class="buildBenefits"><span class="benefitLabel">Jetzt</span><span>${current}</span></div>
+        <div class="buildBenefits upcoming"><span class="benefitLabel">Ausbau</span><span>${benefit}</span></div>
+        ${next ? `<div class="buildCost">Kosten: ${cost(next.cost)} · ⌛ ${next.days} ${next.days === 1 ? 'Tag' : 'Tage'}</div>` : ''}
+        ${w ? `<div class="buildingProgress">${w}</div>` : ''}
+        ${Upgrades.html(k)}</div>
+        <div class="buildAction">${next ? `<button data-build="${k}" ${block ? 'disabled' : ''} title="${esc(block || 'Bau beginnen')}">${L ? 'Ausbauen' : 'Bauen'}</button>${block ? `<span class="small">${esc(block)}</span>` : ''}` : '<span class="buildingMax">Vollendet</span>'}</div></div>`;
     }).join('');
     const r = c.resources;
     UI.modal(`<h2>Hügelgrab – Bauen</h2><p class="small">Ein Bau zur Zeit; er geht weiter, während die Armee unterwegs ist. Die Diener im Hügelgrab bauen auch, wenn der Lich fort ist.</p>
@@ -5571,10 +5577,10 @@ const UI = {
     $('threats').innerHTML = list.map(({ f, v, living }) => {
       const t = troops[f] || 0, m = full[f] || 1, pct = Math.min(100, Math.round(t / m * 100));
       return `<div class="threat ${living ? '' : 'dead'} ${living && v >= 50 ? 'hot' : ''}" data-fac="${f}">
-        <span>${DATA.factions[f].name}</span><span style="text-align:right">${living ? v + ' %' : '†'}</span>
-        <div class="bar" title="Bedrohung ${v} %${living ? (v >= 50 ? ' – gewarnt: Wachen sind sofort alarmiert' : ' – noch ahnungslos') : ''}"><div style="width:${v}%;background:${DATA.factions[f].color}"></div></div>
-        <div class="bar troops" title="Truppen: ${t} von ursprünglich ${m} leben noch (Orte und Trupps)"><div style="width:${pct}%"></div></div>
-        <span class="small">Truppen ${t} / ${m}</span></div>`;
+        <span class="threatName" style="--faction:${DATA.factions[f].color}">${esc(DATA.factions[f].name)}</span>
+        <span class="threatRisk" title="Bedrohung">⚑ ${living ? v + ' %' : 'Besiegt'}</span>
+        <span class="threatSoldiers" title="Verbliebene Truppen">⚔ ${t.toLocaleString('de-DE')} / ${m.toLocaleString('de-DE')} Truppen</span>
+        <div class="bar" title="Bedrohung ${v} %"><div style="width:${Math.min(100, Math.max(0,v))}%;background:${DATA.factions[f].color}"></div></div></div>`;
     }).join('');
     // Hover: all places (and war parties) of the faction blink on the minimap.
     $('threats').querySelectorAll('[data-fac]').forEach(el => {
@@ -5626,7 +5632,7 @@ const UI = {
     const c = game.campaign, btn = $('btnBuild'); if (!c || !btn) return;
     const w = c.construction;
     const open = Object.keys(DATA.baseBuildings).filter(k => !Base.blocker(k)).length + DATA.upgrades.filter(u => !Upgrades.blocker(u)).length;
-    btn.innerHTML = '<span class="ic">⚒</span>Bauen' + (w ? `<span class="badge busy" title="im Bau">${w.daysLeft} T.</span>` : open ? `<span class="badge">${open}</span>` : '');
+    btn.innerHTML = '<span class="ic sigilIcon" data-sigil="build">' + (window.HARMBRINGER_UI_ART ? HARMBRINGER_UI_ART.action('build') : '⚒') + '</span>Bauen' + (w ? `<span class="badge busy" title="im Bau">${w.daysLeft} T.</span>` : open ? `<span class="badge">${open}</span>` : '');
     btn.title = (w ? `Im Bau: ${DATA.baseBuildings[w.k].name} Stufe ${w.level}, noch ${w.daysLeft} ${w.daysLeft === 1 ? 'Tag' : 'Tage'}. ` : '')
       + (open ? `${open} ${open === 1 ? 'Gebäude oder Verbesserung kann' : 'Gebäude oder Verbesserungen können'} jetzt gebaut werden. ` : '')
       + 'Gebäude im Hügelgrab bauen – geht von überall (B)';
@@ -5889,28 +5895,22 @@ const UI = {
   },
   openRecruit() {
     const c = game.campaign;
-    // Categories (filter) and sort keys, chosen in the column on the left.
     const siegeDef = (t, u) => u.role === 'SIEGE' || u.size >= 4 || t === 'huenenkoenig';
-    const CATS = [['all', 'Alle', () => true], ['melee', 'Nahkampf', (t, u) => u.range <= 1 && u.power !== 'HEAL'], ['ranged', 'Fernkampf', (t, u) => u.range > 1 && u.role !== 'CASTER' && !siegeDef(t, u)],
-      ['siege', 'Belagerung', siegeDef], ['caster', 'Zauber und Heilung', (t, u) => u.role === 'CASTER' || u.power === 'HEAL'], ['flying', 'Flieger', (t, u) => u.flying],
-      ['spectral', 'Geister (durch Wände)', (t, u) => u.spectral], ['swim', 'Schwimmer', t => SWIMMERS.has(t)], ['leader', 'Anführer', (t, u) => (u.commandPoints || 0) < 0]];
-    const cost = (u, k) => (u.cost || {})[k] || 0;
-    const SORTS = [['name', 'Name', u => u.name], ['corpses', 'Leichen', u => cost(u, 'corpses')], ['bones', 'Knochen', u => cost(u, 'bones')], ['souls', 'Seelen', u => cost(u, 'souls')],
-      ['command', 'Kommando', u => u.commandPoints || 0], ['hp', 'Lebenspunkte', u => u.hp], ['damage', 'Schaden', u => u.damage], ['initiative', 'Initiative', u => u.initiative],
-      ['move', 'Bewegung', u => u.move], ['range', 'Reichweite', u => u.range]];
-    this.recruitCat = this.recruitCat || 'all'; this.recruitSort = this.recruitSort || 'name'; this.recruitDir = this.recruitDir || 1;
-    const all = Recruitment.candidates(), cat = CATS.find(x => x[0] === this.recruitCat) || CATS[0], srt = SORTS.find(x => x[0] === this.recruitSort) || SORTS[0];
-    const list = all.filter(([t, u]) => cat[2](t, u)).sort(([, a], [, b]) => { const x = srt[2](a), y = srt[2](b); return (typeof x === 'string' ? x.localeCompare(y) : x - y) * this.recruitDir || a.name.localeCompare(b.name); });
-    const side = `<div class="recSide"><h3>Kategorie</h3>${CATS.map(([k, n, f]) => { const cnt = all.filter(([t, u]) => f(t, u)).length;
-        return `<button data-rcat="${k}" class="${k === cat[0] ? 'on' : ''}" ${cnt ? '' : 'disabled'}>${n} <span class="small">${cnt}</span></button>`; }).join('')}
-      <h3>Sortieren</h3>${SORTS.map(([k, n]) => `<button data-rsort="${k}" class="${k === srt[0] ? 'on' : ''}">${['corpses', 'bones', 'souls', 'command'].includes(k) ? resIcon(k) : ''}${n}${k === srt[0] ? (this.recruitDir > 0 ? ' ▲' : ' ▼') : ''}</button>`).join('')}</div>`;
+    const category = (t, u) => siegeDef(t, u) ? 'siege' : (u.range > 1 ? 'ranged' : 'melee');
+    const CATS = [['melee', '⚔ Nahkampf'], ['ranged', '⌖ Fernkampf'], ['siege', '♜ Belagerung']];
+    this.recruitCat = CATS.some(([k]) => k === this.recruitCat) ? this.recruitCat : 'melee';
+    const all = Recruitment.candidates();
+    const list = all.filter(([t, u]) => category(t, u) === this.recruitCat).sort(([, a], [, b]) => a.name.localeCompare(b.name, 'de'));
+    const side = `<div class="recSide"><h3>Truppengattung</h3>${CATS.map(([k, n]) => {
+      const cnt = all.filter(([t, u]) => category(t, u) === k).length;
+      return `<button data-rcat="${k}" class="${k === this.recruitCat ? 'on' : ''}" ${cnt ? '' : 'disabled'}>${n}<span class="groupCount">${cnt}</span></button>`; }).join('')}</div>`;
     const rows = list.map(([type, u]) => {
       const block = Recruitment.blocker(type);
       const cost = costHtml(u.cost, c.resources);
       const locked = !!block && block.startsWith('Benötigt');
       return `<div class="recruitRow ${locked ? 'locked' : ''}">${portraitHtml(type, u)}
         <div><b>${u.name}</b> <span class="small">· ${u.commandPoints < 0 ? `+${-u.commandPoints} Kommando (Anführer)` : u.commandPoints + ' Kommando'} · Kosten: ${cost}</span><br>
-        ${u.rarityBonus ? `<span class="small" title="Seltene Einheiten sind stärker: +5 % je nötigem Wissenspunkt, +10 % aus gestürzten Pantheons">✦ selten: +${Math.round(u.rarityBonus * 100)} % LP, Schaden, Schild</span><br>` : ''}<span class="small">LP ${u.hp} · Ini ${u.initiative} · Bew ${u.move} · Schaden ${u.damage} ${POWER_NAMES[u.power]} · Reichweite ${u.range} · Rüstung ${DEFENSE_NAMES[u.defense]}</span><br>
+        ${u.rarityBonus ? `<span class="small" title="Seltene Einheiten sind stärker: +5 % je nötigem Wissenspunkt, +10 % aus gestürzten Pantheons">✦ selten: +${Math.round(u.rarityBonus * 100)} % LP, Schaden, Schild</span><br>` : ''}<div class="recruitStatGrid">${[['hp','Lebenspunkte',u.hp],['initiative','Initiative',u.initiative],['move','Bewegung',u.move],['damage','Schaden',u.damage+' '+POWER_NAMES[u.power]],['range','Reichweite',u.range],['armor','Rüstung',DEFENSE_NAMES[u.defense]]].map(([icon,title,val])=>`<span title="${title}">${window.HARMBRINGER_UI_ART ? HARMBRINGER_UI_ART.stat(icon) : '◆'}<b>${val}</b><small>${title}</small></span>`).join('')}</div>
         <span class="small"><i>${esc(u.desc || '')}</i></span></div>
         <div class="recruitBtns">${(() => { const max = Recruitment.maxAffordable(type);
           return `<button data-type="${type}" data-n="1" ${block ? 'disabled' : ''} title="${block || 'Eine Einheit'}">+1</button>
@@ -5929,10 +5929,6 @@ const UI = {
       <div class="recLayout">${side}<div class="recList">${rows || '<p class="small">Keine Einheit in dieser Kategorie.</p>'}${this.armyHtml()}</div></div>`, [{ label: 'Schließen', primary: true, action: () => { Recruitment.remote = false; this.renderInfo(); this.updateHeader(); } }]);
     $('modalBody').classList.add('wide');
     $('modalBody').querySelectorAll('[data-rcat]').forEach(b => b.onclick = () => { this.recruitCat = b.dataset.rcat; this.openRecruit(); });
-    $('modalBody').querySelectorAll('[data-rsort]').forEach(b => b.onclick = () => {
-      if (this.recruitSort === b.dataset.rsort) this.recruitDir = -this.recruitDir;
-      else { this.recruitSort = b.dataset.rsort; this.recruitDir = ['name', 'corpses', 'bones', 'souls', 'command'].includes(b.dataset.rsort) ? 1 : -1; }
-      this.openRecruit(); });
     $('modalBody').querySelectorAll('button[data-type]').forEach(b => b.onclick = () => {
       const type = b.dataset.type, max = Recruitment.maxAffordable(type);
       const want = b.dataset.n === 'max' ? max : b.dataset.n === 'input' ? Math.floor(+($('modalBody').querySelector(`[data-count="${type}"]`).value) || 0) : +b.dataset.n;
