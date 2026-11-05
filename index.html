@@ -2007,7 +2007,7 @@ const Base = {
     const entries = Object.entries(DATA.baseBuildings);
     if (!DATA.baseBuildings[this.selected]) this.selected = 'phylactery';
     const sel = this.selected, B = DATA.baseBuildings[sel], L = this.level(sel), next = B.levels[L], block = this.blocker(sel);
-    const art = k => window.HARMBRINGER_UI_ART ? HARMBRINGER_UI_ART.building(k) : '⌂';
+    const art = k => window.HARMBRINGER_PAINT ? HARMBRINGER_PAINT.building(k) : (window.HARMBRINGER_UI_ART ? HARMBRINGER_UI_ART.building(k) : '⌂');
     const status = k => {
       const b = DATA.baseBuildings[k], lev = this.level(k), reason = this.blocker(k);
       if (lev >= b.levels.length) return ['max', 'Vollendet'];
@@ -5668,7 +5668,7 @@ const UI = {
     const c = game.campaign, btn = $('btnBuild'); if (!c || !btn) return;
     const w = c.construction;
     const open = Object.keys(DATA.baseBuildings).filter(k => !Base.blocker(k)).length + DATA.upgrades.filter(u => !Upgrades.blocker(u)).length;
-    btn.innerHTML = '<span class="ic sigilIcon" data-sigil="build">' + (window.HARMBRINGER_UI_ART ? HARMBRINGER_UI_ART.action('build') : '⚒') + '</span>Bauen' + (w ? `<span class="badge busy" title="im Bau">${w.daysLeft} T.</span>` : open ? `<span class="badge">${open}</span>` : '');
+    btn.innerHTML = '<span class="ic sigilIcon" data-sigil="build">' + (window.HARMBRINGER_PAINT ? HARMBRINGER_PAINT.action('build') : window.HARMBRINGER_UI_ART ? HARMBRINGER_UI_ART.action('build') : '⚒') + '</span>Bauen' + (w ? `<span class="badge busy" title="im Bau">${w.daysLeft} T.</span>` : open ? `<span class="badge">${open}</span>` : '');
     btn.title = (w ? `Im Bau: ${DATA.baseBuildings[w.k].name} Stufe ${w.level}, noch ${w.daysLeft} ${w.daysLeft === 1 ? 'Tag' : 'Tage'}. ` : '')
       + (open ? `${open} ${open === 1 ? 'Gebäude oder Verbesserung kann' : 'Gebäude oder Verbesserungen können'} jetzt gebaut werden. ` : '')
       + 'Gebäude im Hügelgrab bauen – geht von überall (B)';
