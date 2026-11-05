@@ -268,7 +268,7 @@
   .dmgText.heal { color: #1f6a2a; }
   #edgeTip { position: absolute; padding: 2px 8px; font-size: 13px; pointer-events: none; z-index: 7; }
 </style>
-<link rel="stylesheet" href="ui.css?v=2">
+<link rel="stylesheet" href="ui.css?v=2"><link rel="stylesheet" href="ui-wc3.css?v=1">
 <script defer src="ui-art.js?v=1"></script>
 <!-- Game data: classic scripts, loaded before the game module -->
 <!-- ?v=… forces browsers (GitHub Pages caches 10 min) to load data that matches this index.html.
@@ -313,10 +313,10 @@
   <div class="sidebarBrand"><span>Harmbringer</span><small>Die Chronik des Lichs</small></div>
   <div id="minimap" class="hidden"><canvas id="miniMap" title="Klick: Kamera dorthin · Mausrad: Zoom"></canvas>
   <div class="zoom"><button id="miniIn" title="Hineinzoomen">+</button><button id="miniOut" title="Herauszoomen">−</button><button id="miniMode">◎</button></div>
-  <div class="zoomLabel" id="miniZoom">1×</div></div>
+  <div class="zoomLabel" id="miniZoom">1×</div><button id="btnRecruitSite" class="mapSite" title="Nächsten Rekrutierungsort auf der Karte auswählen (R)">» Grabstätte</button></div>
   <div id="worldButtons" class="hidden" role="group" aria-label="Kampagnenaktionen">
     <button id="btnHome" title="Zum Hügelgrab (H)"><span class="ic sigilIcon" data-sigil="home"></span>Hügelgrab</button>
-    <button id="btnRecruitSite" title="Nächster Ort zum Rekrutieren, mehrmals klicken für die nächsten (R)"><span class="ic sigilIcon" data-sigil="recruit"></span>Rekrutieren</button>
+    <button id="btnRecruitLocal" title="Am aktuellen Ort Untote rekrutieren" disabled><span class="ic sigilIcon" data-sigil="recruit"></span>Rekrutieren</button>
     <button id="btnBuild" title="Gebäude im Hügelgrab bauen – geht von überall (B)"><span class="ic sigilIcon" data-sigil="build"></span>Bauen</button>
     <button id="btnRest" title="Rasten bis zu einer Tageszeit – z. B. um nachts anzugreifen"><span class="ic sigilIcon" data-sigil="rest"></span>Rasten</button>
     <button id="btnInventory" title="Artefakte und besondere Orte (I)"><span class="ic sigilIcon" data-sigil="inventory"></span>Inventar</button>
@@ -2002,30 +2002,62 @@ const Base = {
     return 'Erhebt: ' + l.produces.map(t => Knowledge.known(t) ? DATA.units[t].name : '???').join(', ');
   },
   open() {
-    const c = game.campaign, cost = o => costHtml(o, c.resources);
-    const rows = Object.entries(DATA.baseBuildings).map(([k, B]) => {
-      const L = this.level(k), next = B.levels[L], block = this.blocker(k);
-      const have = B.levels.slice(0, L).map(l => [l.text, this.producesText(l)].filter(Boolean).join(' ')).join('<br>');
-      const w = c.construction && c.construction.k === k ? ` · <b>im Bau: noch ${c.construction.daysLeft} ${c.construction.daysLeft === 1 ? 'Tag' : 'Tage'}</b>` : '';
-      const art = window.HARMBRINGER_UI_ART ? HARMBRINGER_UI_ART.building(k) : '⌂';
-      const current = have || (L ? 'Bereits errichtet.' : 'Noch nicht errichtet.');
-      const benefit = next ? [next.text, this.producesText(next)].filter(Boolean).join(' ') : 'Höchste Stufe erreicht.';
-      return `<div class="buildRow"><div class="buildPortrait" aria-hidden="true">${art}</div>
-        <div class="buildDetails"><div class="bHead"><b>${esc(B.name)}</b><span class="buildingLvl">Stufe ${L} / ${B.levels.length}</span></div>
-        <div class="buildBenefits"><span class="benefitLabel">Jetzt</span><span>${current}</span></div>
-        <div class="buildBenefits upcoming"><span class="benefitLabel">Ausbau</span><span>${benefit}</span></div>
-        ${next ? `<div class="buildCost">Kosten: ${cost(next.cost)} · ⌛ ${next.days} ${next.days === 1 ? 'Tag' : 'Tage'}</div>` : ''}
-        ${w ? `<div class="buildingProgress">${w}</div>` : ''}
-        ${Upgrades.html(k)}</div>
-        <div class="buildAction">${next ? `<button data-build="${k}" ${block ? 'disabled' : ''} title="${esc(block || 'Bau beginnen')}">${L ? 'Ausbauen' : 'Bauen'}</button>${block ? `<span class="small">${esc(block)}</span>` : ''}` : '<span class="buildingMax">Vollendet</span>'}</div></div>`;
+    const c = game.campaign, fmtCost = o => costHtml(o, c.resources);
+    const entries = Object.entries(DATA.baseBuildings);
+    if (!DATA.baseBuildings[this.selected]) this.selected = 'phylactery';
+    const sel = this.selected, B = DATA.baseBuildings[sel], L = this.level(sel), next = B.levels[L], block = this.blocker(sel);
+    const art = k => window.HARMBRINGER_UI_ART ? HARMBRINGER_UI_ART.building(k) : '⌂';
+    const status = k => {
+      const b = DATA.baseBuildings[k], lev = this.level(k), reason = this.blocker(k);
+      if (lev >= b.levels.length) return ['max', 'Vollendet'];
+      if (c.construction && c.construction.k === k) return ['busy', 'Im Bau'];
+      if (reason && !reason.startsWith('Zu wenig') && reason !== 'Es wird schon gebaut') return ['locked', 'Gesperrt'];
+      return ['ready', 'Ausbaubar'];
+    };
+    const buildingTiles = entries.map(([k,b]) => {
+      const l = this.level(k), [state,label] = status(k);
+      const need = l === 0 && state === 'locked' ? this.blocker(k) : '';
+      return `<button class="buildingTile ${sel === k ? 'selected' : ''} ${state}" data-building="${k}" aria-pressed="${sel === k}">
+        <span class="tileArtwork">${art(k)}</span><span class="tileCopy"><strong>${esc(b.name)}</strong><em>Stufe ${l} / ${b.levels.length}</em>
+        <small class="tileStatus">${state === 'locked' ? '♙ ' : state === 'ready' ? '⬆ ' : ''}${label}</small>
+        ${need ? `<small class="tileReason">${esc(need)}</small>` : ''}</span></button>`;
     }).join('');
-    const r = c.resources;
-    UI.modal(`<h2>Hügelgrab – Bauen</h2><p class="small">Ein Bau zur Zeit; er geht weiter, während die Armee unterwegs ist. Die Diener im Hügelgrab bauen auch, wenn der Lich fort ist.</p>
-      <div class="stickyRes">${resSummary(r)}</div>
-      <p class="small">${Knowledge.hint()}</p>${rows}`, [{ label: 'Schließen', primary: true, action: () => { UI.renderInfo(); UI.updateHeader(); } }]);
-    document.querySelectorAll('[data-build]').forEach(b => b.onclick = () => this.start(b.dataset.build));
-    document.querySelectorAll('[data-upg]').forEach(b => b.onclick = () => Upgrades.buy(b.dataset.upg));
+    const current = B.levels.slice(0,L).map(l => [l.text, this.producesText(l)].filter(Boolean).join(' ')).join(' · ') || 'Noch nicht errichtet.';
+    const upcoming = next ? [next.text, this.producesText(next)].filter(Boolean).join(' ') : 'Höchste Ausbaustufe erreicht.';
+    const upgrades = DATA.upgrades.filter(u => u.building === sel).map((u,i) => {
+      const owned = Upgrades.has(u.id), blocked = Upgrades.blocker(u);
+      const available = !owned && !blocked;
+      const symbol = ['✥','♜','✦','⚔','☾','♱','⛨','⚒','◈'][i%9];
+      return `<button class="upgradeTile ${owned ? 'owned' : blocked ? 'locked' : 'available'}" data-upg="${u.id}" ${!available?'disabled':''}
+        title="${esc(u.name)} — ${esc(u.text)}${owned ? ' (bereits erforscht)' : blocked ? ' · '+esc(blocked) : ' · Kosten: '+Object.entries(u.cost||{}).map(([r,n])=>n+' '+RESOURCE_NAMES[r]).join(', ')}">
+        <span class="upgradeArt" aria-hidden="true">${symbol}</span><span class="upgradeName">${esc(u.name)}</span>
+        <small>${owned?'✓ Erforscht':blocked ? esc(blocked) : 'Verbessern'}</small></button>`;
+    }).join('');
+    const progress = c.construction && c.construction.k===sel ? `<div class="constructionNotice">⌛ Im Bau · noch ${c.construction.daysLeft} Tage</div>` : '';
+    UI.modal(`<div class="screenTitle"><span>⚒</span><h2>Hügelgrab – Bauen</h2><span>⚒</span></div>
+      <div class="stickyRes">${resSummary(c.resources)}</div>
+      <div class="buildScreen">
+        <section class="buildingSelection" aria-label="Gebäudeübersicht"><h3>Gebäude des Hügelgrabs</h3><div class="buildingTileGrid">${buildingTiles}</div></section>
+        <section class="buildingInspector" aria-label="Gebäudedetails"><div class="buildingHeroArt">${art(sel)}</div>
+          <h3>${esc(B.name)} <small>Stufe ${L} / ${B.levels.length}</small></h3>
+          <div class="buildingFact"><b>Aktuell</b><span>${current}</span></div>
+          <div class="buildingFact next"><b>${next ? 'Ausbau auf Stufe '+(L+1) : 'Vollendet'}</b><span>${upcoming}</span></div>
+          ${next ? `<div class="buildingRequirements"><span>${fmtCost(next.cost)}</span><span>⌛ ${next.days} ${next.days===1?'Tag':'Tage'}</span></div>` : ''}
+          ${progress}
+          <div class="buildingCommand">${next ? `<button class="primary" data-build="${sel}" ${block?'disabled':''} title="${esc(block||'')}" >${L ? 'Auf Stufe '+(L+1)+' ausbauen' : 'Errichten'}</button>` : ''}
+          ${block && next ? `<small class="buildBlocked">${esc(block)}</small>` : ''}</div>
+          <h3 class="upgradesHeading">✦ Verbesserungen</h3>
+          <div class="upgradeTileGrid">${upgrades || '<p class="small">Für dieses Gebäude gibt es keine besonderen Verbesserungen.</p>'}</div>
+        </section>
+      </div>
+      <p class="screenFoot">Nur ein Bau gleichzeitig · Die Arbeiten gehen während der Reise weiter.</p>`,
+      [{label:'Schließen',primary:true,action:()=>{UI.renderInfo();UI.updateHeader();}}]);
+    $('modalBody').classList.add('wide','hb-build-modal');
+    $('modalBody').querySelectorAll('[data-building]').forEach(b=>b.onclick=()=>{ this.selected=b.dataset.building; this.open();});
+    $('modalBody').querySelectorAll('[data-build]').forEach(b=>b.onclick=()=>this.start(b.dataset.build));
+    $('modalBody').querySelectorAll('[data-upg]').forEach(b=>b.onclick=()=>Upgrades.buy(b.dataset.upg));
   }
+
 };
 const Recruitment = {
   canRecruitAt(node) { return node && node.type in RECRUIT_AT && (node.type === 'PHYLACTERY' || Campaign.isConquered(node)); },
@@ -5553,12 +5585,14 @@ const UI = {
     $('resources').innerHTML = chip('corpses', r.corpses, 'Leichen') + chip('bones', r.bones, 'Knochen') + chip('souls', r.souls, 'Seelen')
       + chip('knowledge', r.knowledge, 'Wissen') + chip('command', `${used}/${lim}`, 'Kommando', used >= lim ? 'full' : '');
     this.buildBadge(); this.newsBadge();
+    const localRecruit = $('btnRecruitLocal');
+    if (localRecruit) { const can = game.mode === 'world' && Recruitment.canRecruitAt(Campaign.armyNode()); localRecruit.disabled = !can; localRecruit.title = can ? `In ${Campaign.armyNode().name} rekrutieren` : 'Nur an eroberten Rekrutierungsorten möglich; Karte: » Grabstätte'; }
     // Threat: one chip (mini bars + the highest faction), the full list on click.
     const list = ENEMY_FACTIONS.map(f => ({ f, v: Math.round(c.threat[f] || 0), living: Campaign.isLiving(f) })).sort((x, y) => (y.living - x.living) || (y.v - x.v));
     const top = list.find(x => x.living), warned = list.filter(x => x.living && x.v >= 50);
     $('threatChip').classList.toggle('warn', warned.length > 0);
     $('threatChip').innerHTML = `<span class="mini">${list.filter(x => x.living).map(x => `<i style="height:${Math.max(2, x.v / 5)}px;background:${DATA.factions[x.f].color}"></i>`).join('')}</span>
-      ${warned.length ? `⚠ ${warned.length === 1 ? esc(DATA.factions[warned[0].f].name) : warned.length + ' Fraktionen'} gewarnt` : top ? `Bedrohung ${top.v} %` : 'Bedrohung'}`;
+      ${warned.length ? `⚠ ${warned.length} alarmiert` : top ? `Fraktionen · ${top.v} %` : 'Fraktionen'}`;
     if (!$('threatPop').classList.contains('hidden')) this.renderThreats();
   },
   // Threat list: threat bar and a strength bar (living troops in all places and war parties of the faction).
@@ -5578,9 +5612,9 @@ const UI = {
       const t = troops[f] || 0, m = full[f] || 1, pct = Math.min(100, Math.round(t / m * 100));
       return `<div class="threat ${living ? '' : 'dead'} ${living && v >= 50 ? 'hot' : ''}" data-fac="${f}">
         <span class="threatName" style="--faction:${DATA.factions[f].color}">${esc(DATA.factions[f].name)}</span>
-        <span class="threatRisk" title="Bedrohung">⚑ ${living ? v + ' %' : 'Besiegt'}</span>
+        <span class="threatRisk" title="Bedrohung"><strong>${living ? v + ' %' : '†'}</strong> <em>${!living ? 'Besiegt' : v >= 50 ? 'Alarmiert' : v >= 25 ? 'Wachsam' : 'Ruhig'}</em></span>
         <span class="threatSoldiers" title="Verbliebene Truppen">⚔ ${t.toLocaleString('de-DE')} / ${m.toLocaleString('de-DE')} Truppen</span>
-        <div class="bar" title="Bedrohung ${v} %"><div style="width:${Math.min(100, Math.max(0,v))}%;background:${DATA.factions[f].color}"></div></div></div>`;
+        </div>`;
     }).join('');
     // Hover: all places (and war parties) of the faction blink on the minimap.
     $('threats').querySelectorAll('[data-fac]').forEach(el => {
@@ -5709,34 +5743,36 @@ const UI = {
   },
   // Inventory: artifacts (equip up to DATA.artifactSlots) and owned special places.
   openInventory() {
-    const c = game.campaign, slots = DATA.artifactSlots;
-    const row = id => {
-      const a = DATA.artifacts[id], on = c.equipped.includes(id);
-      const full = !on && c.equipped.length >= slots;
-      return `<div class="recruitRow" style="grid-template-columns:1fr auto"><div><b>${a.name}</b>${on ? ' <span class="small">· angelegt</span>' : ''}<br><span class="small">${a.text}</span></div>
-        <div><button data-art="${id}" ${full ? 'disabled title="Alle Plätze belegt"' : ''}>${on ? 'Ablegen' : 'Anlegen'}</button></div></div>`;
-    };
-    const arts = c.inventory.length ? c.inventory.map(row).join('')
-      : '<p class="small">Noch keine Artefakte. Orte mit ★ auf der Karte bergen Artefakte, Einkommen oder dauerhafte Vorteile.</p>';
-    const owned = Campaign.ownedSpecials();
-    const sites = owned.length ? '<ul>' + owned.map(n => `<li><b>${esc(n.name)}</b>: ${DATA.specials[n.special].text || DATA.artifacts[DATA.specials[n.special].artifact].name + ' geborgen'}</li>`).join('') + '</ul>'
-      : '<p class="small">Noch keine besonderen Orte erobert.</p>';
-    const fx = Campaign.effects();
-    const NAMES = { lichHp: 'Lich LP', lichDamage: 'Lich Schaden', lichShield: 'Lich Seelenschild', undeadHpPct: 'Untote LP', undeadDamagePct: 'Untote Schaden',
-      undeadMr: 'Untote Magieresistenz', undeadIni: 'Untote Initiative', travelPct: 'Reisetempo', commandLimit: 'Kommando', healPct: 'Heilung nach Sieg',
-      soulsPerVictory: 'Seelen pro Sieg', knowledgePerVictory: 'Wissen pro Sieg', lootBonesPct: 'Knochen aus Kämpfen', lootCorpsesPct: 'Leichen aus Kämpfen' };
-    const fmt = (k, v) => k.endsWith('Pct') ? `+${Math.round(v * 100)} %` : `+${v}`;
-    const total = Object.entries(fx).filter(([, v]) => v).map(([k, v]) => `${NAMES[k] || k} ${fmt(k, v)}`).join(' · ') || 'keine';
-    const income = {};
-    for (const n of owned) for (const [k, v] of Object.entries(DATA.specials[n.special].income || {})) income[k] = (income[k] || 0) + v;
-    const inc = Object.entries(income).map(([k, v]) => `${v} ${RESOURCE_NAMES[k]}`).join(', ') || 'keins';
-    this.modal(`<h2>Inventar</h2>
-      <p class="small">Angelegt: ${c.equipped.length} / ${slots} Plätze · Wirkung gesamt: ${total} · Einkommen pro Tag: ${inc}</p>
-      <h3>Artefakte</h3>${arts}<h3>Besondere Orte</h3>${sites}`, [{ label: 'Schließen', primary: true, action: () => { this.renderInfo(); this.updateHeader(); } }]);
-    $('modalBody').querySelectorAll('button[data-art]').forEach(b => b.onclick = () => {
-      const id = b.dataset.art, i = c.equipped.indexOf(id);
-      if (i >= 0) c.equipped.splice(i, 1); else if (c.equipped.length < slots) c.equipped.push(id);
-      SaveGame.save(); this.openInventory();
+    const c=game.campaign,slots=DATA.artifactSlots,fx=Campaign.effects();
+    const icon=(id)=>{const a=DATA.artifacts[id],i=c.inventory.indexOf(id);return ['✥','♱','⚜','☽','♜','✦','⚚','♛'][((i<0?0:i)%8)];};
+    const equipped=Array.from({length:slots},(_,i)=>{
+      const id=c.equipped[i],a=id&&DATA.artifacts[id];
+      return a?`<button class="artifactSlot filled" data-art="${id}" title="${esc(a.name)}: ${esc(a.text)} — Klicken zum Ablegen"><span class="artifactGlyph">${icon(id)}</span><b>${esc(a.name)}</b></button>`
+      :`<div class="artifactSlot empty" title="Freier Artefaktplatz"><span class="artifactGlyph">◇</span><small>Freier Platz</small></div>`;
+    }).join('');
+    const backpack=c.inventory.filter(id=>DATA.artifacts[id]).map(id=>{
+      const a=DATA.artifacts[id],on=c.equipped.includes(id),full=!on&&c.equipped.length>=slots;
+      return `<button class="artifactInventoryTile ${on?'equipped':''}" data-art="${id}" ${full?'disabled':''}
+        title="${esc(a.text)}${full?' — alle Plätze belegt':''}"><span class="artifactGlyph">${icon(id)}</span><b>${esc(a.name)}</b><small>${on?'Angelegt · ablegen':full?'Plätze voll':'Anlegen'}</small></button>`;
+    }).join('');
+    const names={lichHp:'LP des Lichs',lichDamage:'Schaden des Lichs',lichShield:'Seelenschild',undeadHpPct:'Untote: LP',undeadDamagePct:'Untote: Schaden',undeadMr:'Magieresistenz',undeadIni:'Initiative',travelPct:'Reisetempo',commandLimit:'Kommando',healPct:'Heilung nach Sieg',soulsPerVictory:'Seelen je Sieg',knowledgePerVictory:'Wissen je Sieg',lootBonesPct:'Knochenbeute',lootCorpsesPct:'Leichenbeute'};
+    const benefits=Object.entries(fx).filter(([,v])=>v).map(([k,v])=>`<div class="relicBonus"><span>✦ ${names[k]||esc(k)}</span><b>${k.endsWith('Pct')?Math.round(v*100)+' %':(v>0?'+':'')+v}</b></div>`).join('');
+    const img=portraitHtml('lich',DATA.units.lich);
+    this.modal(`<div class="screenTitle"><span>✦</span><h2>Inventar &amp; Reliquien</h2><span>✦</span></div>
+      <div class="inventoryScreen">
+        <section class="lichShowcase"><h3>Der Lich</h3><div class="lichPortraitLarge">${img}</div>
+          <p class="lichTitle">Herr des Hügelgrabs</p><p>Artefakte verleihen dauerhafte Kräfte. Du kannst ${slots} Artefakte gleichzeitig tragen.</p></section>
+        <section class="equipPanel"><h3>Artefaktplätze <small>${c.equipped.length} / ${slots}</small></h3><div class="equipRune">☥</div><div class="artifactSlots">${equipped}</div>
+          <h3>Aktive Wirkungen</h3><div class="relicBonuses">${benefits||'<p class="small">Noch keine aktiven Boni.</p>'}</div></section>
+        <section class="backpackPanel"><h3>Gefundene Artefakte <small>${c.inventory.length}</small></h3><div class="artifactInventoryGrid">${backpack||'<p class="small">Noch keine Artefakte gefunden. Erkunde mythische Orte und Klöster.</p>'}</div>
+          <p class="small">Artefakt anklicken: anlegen oder ablegen.</p></section>
+      </div>`,
+      [{label:'Schließen',primary:true,action:()=>{this.renderInfo();this.updateHeader();}}]);
+    $('modalBody').classList.add('wide','hb-inventory-modal');
+    $('modalBody').querySelectorAll('button[data-art]').forEach(b=>b.onclick=()=>{
+      const id=b.dataset.art,i=c.equipped.indexOf(id);
+      if(i>=0)c.equipped.splice(i,1);else if(c.equipped.length<slots)c.equipped.push(id);
+      SaveGame.save();this.openInventory();
     });
   },
   // Army as cards: portrait, count, health bar and the values that matter (per creature).
@@ -5894,53 +5930,64 @@ const UI = {
     }
   },
   openRecruit() {
-    const c = game.campaign;
-    const siegeDef = (t, u) => u.role === 'SIEGE' || u.size >= 4 || t === 'huenenkoenig';
-    const category = (t, u) => siegeDef(t, u) ? 'siege' : (u.range > 1 ? 'ranged' : 'melee');
-    const CATS = [['melee', '⚔ Nahkampf'], ['ranged', '⌖ Fernkampf'], ['siege', '♜ Belagerung']];
-    this.recruitCat = CATS.some(([k]) => k === this.recruitCat) ? this.recruitCat : 'melee';
-    const all = Recruitment.candidates();
-    const list = all.filter(([t, u]) => category(t, u) === this.recruitCat).sort(([, a], [, b]) => a.name.localeCompare(b.name, 'de'));
-    const side = `<div class="recSide"><h3>Truppengattung</h3>${CATS.map(([k, n]) => {
-      const cnt = all.filter(([t, u]) => category(t, u) === k).length;
-      return `<button data-rcat="${k}" class="${k === this.recruitCat ? 'on' : ''}" ${cnt ? '' : 'disabled'}>${n}<span class="groupCount">${cnt}</span></button>`; }).join('')}</div>`;
-    const rows = list.map(([type, u]) => {
-      const block = Recruitment.blocker(type);
-      const cost = costHtml(u.cost, c.resources);
-      const locked = !!block && block.startsWith('Benötigt');
-      return `<div class="recruitRow ${locked ? 'locked' : ''}">${portraitHtml(type, u)}
-        <div><b>${u.name}</b> <span class="small">· ${u.commandPoints < 0 ? `+${-u.commandPoints} Kommando (Anführer)` : u.commandPoints + ' Kommando'} · Kosten: ${cost}</span><br>
-        ${u.rarityBonus ? `<span class="small" title="Seltene Einheiten sind stärker: +5 % je nötigem Wissenspunkt, +10 % aus gestürzten Pantheons">✦ selten: +${Math.round(u.rarityBonus * 100)} % LP, Schaden, Schild</span><br>` : ''}<div class="recruitStatGrid">${[['hp','Lebenspunkte',u.hp],['initiative','Initiative',u.initiative],['move','Bewegung',u.move],['damage','Schaden',u.damage+' '+POWER_NAMES[u.power]],['range','Reichweite',u.range],['armor','Rüstung',DEFENSE_NAMES[u.defense]]].map(([icon,title,val])=>`<span title="${title}">${window.HARMBRINGER_UI_ART ? HARMBRINGER_UI_ART.stat(icon) : '◆'}<b>${val}</b><small>${title}</small></span>`).join('')}</div>
-        <span class="small"><i>${esc(u.desc || '')}</i></span></div>
-        <div class="recruitBtns">${(() => { const max = Recruitment.maxAffordable(type);
-          return `<button data-type="${type}" data-n="1" ${block ? 'disabled' : ''} title="${block || 'Eine Einheit'}">+1</button>
-          <button data-type="${type}" data-n="10" ${max < 2 ? 'disabled' : ''} title="Bis zu 10">+10</button>
-          <button data-type="${type}" data-n="max" ${max < 2 ? 'disabled' : ''} title="So viele wie möglich (${max})">Max (${max})</button>
-          <span class="nowrap"><input type="number" min="1" max="${Math.max(1, max)}" value="${Math.max(1, Math.min(5, max))}" data-count="${type}" ${block ? 'disabled' : ''}>
-          <button data-type="${type}" data-n="input" ${block ? 'disabled' : ''} title="Eingegebene Anzahl">OK</button></span>`; })()}
-          <div class="small">${block || ''}</div></div></div>`;
+    const c = game.campaign, place = Recruitment.site();
+    const allow = RECRUIT_AT[place.type];
+    const siege = (t,u) => u.role === 'SIEGE' || u.size >= 4 || t === 'huenenkoenig';
+    const category = (t,u) => siege(t,u) ? 'siege' : (u.range > 1 ? 'ranged' : 'melee');
+    const CATS = [['melee','⚔ Nahkampf'],['ranged','⌖ Fernkampf'],['siege','♜ Belagerung']];
+    this.recruitCat = CATS.some(([k])=>k===this.recruitCat) ? this.recruitCat : 'melee';
+    const all = Object.entries(DATA.units).filter(([t,u])=>u.side==='undead' && t!=='lich' && !u.ancestor && (!allow || allow.includes(t)));
+    const entries = all.filter(([t,u])=>category(t,u)===this.recruitCat);
+    const requirement = (t,u) => {
+      if(u.requiresPantheon && !Pantheons.assimilated(u.requiresPantheon)) return 'Pantheon stürzen: '+DATA.pantheons[u.requiresPantheon].name;
+      if(!Knowledge.known(t)) return 'Wissen: '+(u.requiresKnowledge||0)+' erforderlich';
+      const p=Base.producer(t);
+      if(p && Base.level(p.k)<p.level) return DATA.baseBuildings[p.k].name+' Stufe '+p.level+' erforderlich';
+      if(u.requiresPantheon && !Base.level('knowledgeAltar')) return 'Wissensaltar erforderlich';
+      return Recruitment.blocker(t) || '';
+    };
+    if(!entries.some(([t])=>t===this.recruitSelected)) this.recruitSelected = (entries.find(([t])=>Knowledge.known(t))||entries[0]||[])[0];
+    const selected = entries.find(([t])=>t===this.recruitSelected) || entries[0];
+    const tabs = CATS.map(([k,title])=>`<button data-rcat="${k}" class="${this.recruitCat===k?'active':''}">${title} <span>${all.filter(([t,u])=>category(t,u)===k).length}</span></button>`).join('');
+    const cards = entries.map(([t,u])=>{
+      const need=requirement(t,u),unknown=!Knowledge.known(t),ready=!need,visible=!!u;
+      return `<button class="unitTile ${t===this.recruitSelected?'selected':''} ${unknown?'unknown':need?'unavailable':'ready'}" data-unit="${t}" title="${esc(u.name)}${need?' · '+esc(need):''}" aria-pressed="${t===this.recruitSelected}">
+        ${portraitHtml(t,u)}<span class="unitTileName">${esc(u.name)}</span>
+        ${need ? `<small>♙ ${esc(need)}</small>`: '<small class="unitReady">Bereit</small>'}</button>`;
     }).join('');
-    const r = c.resources;
-    const place = Recruitment.site();
-    this.modal(`<h2>${esc(place.name)} – Rekrutieren</h2>
-      <p class="small">${Knowledge.hint()}</p>
-      ${place.type !== 'PHYLACTERY' ? '<p class="small">Eroberte Orte erheben nur, was ihre Gräber hergeben. Alle Einheiten gibt es im Hügelgrab, Geister auch an mythischen Orten.</p>' : ''}
-      <div class="stickyRes">${resSummary(r)} <span class="cost" title="Kommando">${resIcon('command')}${Campaign.commandUsed()} / ${Campaign.commandLimit()}</span></div>
-      <div class="recLayout">${side}<div class="recList">${rows || '<p class="small">Keine Einheit in dieser Kategorie.</p>'}${this.armyHtml()}</div></div>`, [{ label: 'Schließen', primary: true, action: () => { Recruitment.remote = false; this.renderInfo(); this.updateHeader(); } }]);
-    $('modalBody').classList.add('wide');
-    $('modalBody').querySelectorAll('[data-rcat]').forEach(b => b.onclick = () => { this.recruitCat = b.dataset.rcat; this.openRecruit(); });
-    $('modalBody').querySelectorAll('button[data-type]').forEach(b => b.onclick = () => {
-      const type = b.dataset.type, max = Recruitment.maxAffordable(type);
-      const want = b.dataset.n === 'max' ? max : b.dataset.n === 'input' ? Math.floor(+($('modalBody').querySelector(`[data-count="${type}"]`).value) || 0) : +b.dataset.n;
-      const n = Recruitment.recruitMany(type, Math.min(want, max));
-      if (n) {
-        const name = DATA.units[type].name;
-        this.toast(n === 1 ? `${name} erhebt sich aus dem Grab.` : `${n}× ${name} erheben sich aus dem Grab.`);
-        const scroll = $('modalBody').scrollTop;
-        this.updateHeader(); this.renderInfo(); this.openRecruit(); $('modalBody').scrollTop = scroll;
-      }
-    });
-    $('modalBody').querySelectorAll('input[data-count]').forEach(i => i.onkeydown = e => { if (e.key === 'Enter') $('modalBody').querySelector(`button[data-n="input"][data-type="${i.dataset.count}"]`).click(); });
+    let detail = '<p>In dieser Gattung sind an diesem Ort keine Einheiten vorhanden.</p>';
+    if(selected){
+      const [t,u]=selected,need=requirement(t,u),unknown=!Knowledge.known(t),max=Recruitment.maxAffordable(t);
+      const stat = (ico,label,v)=>`<div class="recruitStat" title="${label}">${window.HARMBRINGER_UI_ART ? HARMBRINGER_UI_ART.stat(ico) : '◆'}<span>${label}</span><b>${esc(String(v))}</b></div>`;
+      detail = `<div class="recruitSelectedHead">${portraitHtml(t,u)}<div><h3>${esc(u.name)}</h3><small>${u.range>1?'Fernkampf':'Nahkampf'} · ${u.commandPoints<0?'Anführer':'Kommando '+u.commandPoints}</small><p>${esc(u.desc||'')}</p></div></div>
+      <div class="recruitStats">${stat('hp','Lebenspunkte',u.hp)}${stat('damage','Schaden',u.damage+' '+POWER_NAMES[u.power])}
+      ${stat('initiative','Initiative',u.initiative)}${stat('move','Bewegung',u.move)}
+      ${stat('range','Reichweite',u.range)}${stat('armor','Rüstung',DEFENSE_NAMES[u.defense])}</div>
+      <div class="recruitCost"><b>Kosten je Einheit</b><span>${costHtml(u.cost,c.resources)}</span></div>
+      ${need ? `<div class="recruitRequirement">${unknown?'Noch nicht entdeckt. ':''}${esc(need)}</div>` : ''}
+      <div class="recruitPurchase"><label>Anzahl <input data-recruit-qty type="number" min="1" max="${Math.max(1,max)}" value="1" ${need?'disabled':''}></label>
+      <button data-qty="1" ${need?'disabled':''}>+1</button><button data-qty="10" ${need?'disabled':''}>+10</button>
+      <button data-recruit="${t}" class="primary" ${need?'disabled':''}>Rekrutieren</button><small>Maximal ${max}</small></div>`;
+    }
+    this.modal(`<div class="screenTitle"><span>☠</span><h2>${esc(place.name)} – Rekrutieren</h2><span>☠</span></div>
+      <div class="stickyRes">${resSummary(c.resources)} <span class="cost">${resIcon('command')}${Campaign.commandUsed()} / ${Campaign.commandLimit()}</span></div>
+      <nav class="recruitTabs" aria-label="Truppengattung">${tabs}</nav>
+      <div class="recruitScreen"><section class="unitGrid" aria-label="Einheiten">${cards||'<p>Keine Einheiten in dieser Gattung.</p>'}</section>
+      <section class="recruitInspector" aria-label="Einheitendetails">${detail}</section></div>
+      <p class="screenFoot">Ausgegraute Truppen können durch Wissen, Gebäude oder Pantheons freigeschaltet werden.</p>`,
+      [{label:'Schließen',primary:true,action:()=>{Recruitment.remote=false;this.renderInfo();this.updateHeader();}}]);
+    $('modalBody').classList.add('wide','hb-recruit-modal');
+    $('modalBody').querySelectorAll('[data-rcat]').forEach(b=>b.onclick=()=>{this.recruitCat=b.dataset.rcat;this.recruitSelected=null;this.openRecruit();});
+    $('modalBody').querySelectorAll('[data-unit]').forEach(b=>b.onclick=()=>{this.recruitSelected=b.dataset.unit;this.openRecruit();});
+    const qty=$('modalBody').querySelector('[data-recruit-qty]');
+    $('modalBody').querySelectorAll('[data-qty]').forEach(b=>b.onclick=()=>{if(qty) qty.value=Math.min(Math.max(1,+qty.value||1)+Number(b.dataset.qty),Math.max(1,Recruitment.maxAffordable(this.recruitSelected)));});
+    const recruitBtn=$('modalBody').querySelector('[data-recruit]');
+    if(recruitBtn) recruitBtn.onclick=()=>{
+      const t=recruitBtn.dataset.recruit,max=Recruitment.maxAffordable(t),want=Math.min(max,Math.max(1,Math.floor(Number(qty.value)||1)));
+      const n=Recruitment.recruitMany(t,want);
+      if(n){this.toast(n===1?DATA.units[t].name+' erhebt sich.':n+' × '+DATA.units[t].name+' erhoben.');
+        this.updateHeader();this.renderInfo();this.openRecruit();}
+    };
   },
   showEnd() {
     const c = game.campaign;
@@ -6283,6 +6330,7 @@ function initInput() {
   $('btnTokens').onclick = () => { game.tokenMode = game.tokenMode === 'auto' || !game.tokenMode ? 'on' : game.tokenMode === 'on' ? 'off' : 'auto'; UI.toast(`Token-Modus: ${{ auto: 'automatisch (weit herausgezoomt)', on: 'an', off: 'aus' }[game.tokenMode]}`); };
   $('battleLog').onclick = () => { const l = $('battleLog'); l.classList.toggle('open'); l.scrollTop = 1e9; };
   $('btnRecruitSite').onclick = () => UI.findRecruitSite();
+  $('btnRecruitLocal').onclick = () => { if (game.mode !== 'world') return; if (Recruitment.canRecruitAt(Campaign.armyNode())) UI.openRecruit(); else UI.toast('Hier können keine Untoten rekrutiert werden. Wähle eine Grabstätte auf der Karte.', 4, false); };
   $('btnHome').onclick = () => UI.focusNode(PHYLACTERY);
   $('btnGo').onclick = () => Expeditions.go();
   $('btnRest').onclick = () => UI.openRest();
