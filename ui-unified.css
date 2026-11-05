@@ -1,0 +1,505 @@
+/* Harmbringer — unified illustrated interface, replaces the former stacked UI skins.
+   One source of truth for positioning. The paintings are decorative, live values are DOM. */
+:root{
+  --side:0px;--bar:0px;--hb-top:86px;--hb-bottom:clamp(210px,25vh,260px);
+  --hb-iron:#6d5441;--hb-gold:#bc9760;--hb-paper:#e4d0a7;--hb-wood:#261c1d;
+  --ink:#30231d;--ink-soft:#705642;--parchment:#e6d2ae;
+  --parchment-dark:#c9ab7e;--blood:#9e4642;--undead:#77508e;
+  --ui-font:Georgia,"Times New Roman",serif;
+}
+#header,#sidebar,#info,.modal,#menuPop,#threatPop{font-family:var(--ui-font);line-height:1.3}
+#header *,#sidebar *,#modalBody *,#threatPop *{box-sizing:border-box}
+#header button,#sidebar button,#modalBody button,#info button{
+  border-radius:0!important;font-family:Georgia,serif;
+  transition:filter .12s;border:2px ridge #937448;cursor:pointer;
+}
+#header button:hover:not(:disabled),#sidebar button:hover:not(:disabled),#modalBody button:hover:not(:disabled){filter:brightness(1.13)}
+#header button:disabled,#sidebar button:disabled,#modalBody button:disabled{cursor:default;opacity:.58}
+#header button:focus-visible,#sidebar button:focus-visible,#modalBody button:focus-visible{
+  outline:3px solid #f1be70;outline-offset:2px;
+}
+#header.hidden,#sidebar.hidden,#info.hidden,#threatPop.hidden,#menuPop.hidden,#minimap.hidden,
+#worldButtons.hidden,#armyPanel.hidden,#btnGo.hidden{display:none!important}
+/* RESPONSIVE HEADER — each label is in a real grid track; no absolute text. */
+#header{position:absolute;inset:0;pointer-events:none;z-index:7}
+#header>*{pointer-events:auto}
+#header #bottomBar{
+  position:absolute;left:0;top:0;right:0;bottom:auto;
+  width:100%;height:var(--hb-top);
+  display:grid;grid-template-columns:minmax(95px,10%) minmax(108px,11%) minmax(175px,1fr) minmax(405px,43%);
+  grid-template-rows:1fr;align-items:center;gap:8px;
+  padding:10px 16px 9px;
+  background:linear-gradient(#2b1d20b0,#170f14d0),url("assets/ui/header.webp") center 44% / 100% 285% no-repeat;
+  border:0;border-bottom:4px ridge #8d6d48;
+  box-shadow:0 3px 12px #0009;overflow:visible;
+}
+#bottomBar #threatChip{
+  grid-column:1;grid-row:1;min-width:0;width:100%;height:38px;
+  display:flex;align-items:center;justify-content:center;gap:3px;
+  padding:4px 5px;margin:0;
+  font:14px/1.1 Georgia,serif;color:#f6e1bf;
+  background:linear-gradient(#543443,#261b21);border:2px ridge #ad875c;
+  white-space:normal;min-height:38px;
+}
+#bottomBar #threatChip .mini{display:none}
+#bottomBar #btnNews{
+  grid-column:2;grid-row:1;min-width:0;width:100%;height:38px;padding:4px 7px;margin:0;
+  color:#f6e1bf;background:linear-gradient(#543443,#261b21);border:2px ridge #ad875c;
+  font:14px/1.1 Georgia,serif;white-space:nowrap;
+}
+#bottomBar #btnNews .badge{margin-left:3px;padding:1px 3px;background:#983c4e;color:#fff;border-radius:2px;font-size:11px}
+#bottomBar #hbBrand{
+  grid-column:3;grid-row:1;position:relative;top:auto;left:auto;
+  transform:none;display:flex;justify-content:center;align-items:center;
+  height:100%;width:100%;min-width:0;min-height:0;pointer-events:none;
+  background:transparent;border:0;box-shadow:none;clip-path:none;
+}
+#hbBrand>span{
+  display:block;max-width:100%;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;
+  font:normal clamp(20px,2.35vw,38px)/1 "IM Fell English",Georgia,serif;
+  text-align:center;color:#f6d596;text-shadow:0 2px 4px #1a0b10,0 0 3px #000;
+}
+#hbBrand small{display:none}
+#bottomBar #resources{
+  grid-column:4;grid-row:1;
+  display:grid;grid-template-columns:repeat(5,minmax(0,1fr));align-items:stretch;
+  gap:2px;width:100%;min-width:0;height:56px;margin:0;padding:4px;
+  background:rgba(26,17,18,.88);border:2px ridge #7a5f42;
+}
+#resources .chip{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  text-align:center;min-width:0;min-height:0;width:100%;gap:1px;padding:1px 2px;
+  border:0;border-right:1px solid #9e7a5366;border-radius:0;
+  background:transparent!important;color:#ecd9b6;overflow:hidden;cursor:help;line-height:1.08;
+}
+#resources .chip:last-child{border-right:0}
+#resources .chip>.resIcon{display:none}
+#resources .chip .lbl{
+  display:block;order:0;font:clamp(10px,.85vw,13px)/1.1 Georgia,serif;
+  color:#ead3ae;white-space:nowrap;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;
+}
+#resources .chip b{
+  order:1;display:block;min-width:0;max-width:100%;overflow:hidden;text-overflow:ellipsis;
+  color:#e8c471;font:700 clamp(12px,1.06vw,18px)/1.2 Georgia,serif;font-variant-numeric:tabular-nums;
+}
+#resources .chip.full b{color:#e7988c}
+#bottomBar .spacer{display:none}
+#bottomBar #status{
+  position:absolute;top:calc(var(--hb-top) + 4px);right:10px;
+  display:flex;align-items:center;gap:5px;white-space:nowrap;
+  background:#312622e8;border:2px ridge #9c7b50;color:#f3dfbb;
+  padding:4px 7px;z-index:3;font-size:12px;line-height:1;
+}
+#bottomBar #dial svg{width:21px;height:21px;display:block}
+#bottomBar #dayNo{font-size:12px}
+#bottomBar #clock{font-size:12px}
+#bottomBar #clock .small,#bottomBar #date{display:none}
+#bottomBar #timeDelta{position:absolute;right:10px;top:calc(var(--hb-top) + 43px);bottom:auto;pointer-events:none}
+#threatPop{
+  position:absolute;left:12px;top:calc(var(--hb-top) + 6px);bottom:auto;right:auto;
+  width:min(440px,calc(100vw - 24px));max-height:calc(100vh - var(--hb-top) - var(--hb-bottom) - 18px);
+  overflow:auto;z-index:12;
+  padding:65px 23px 23px;
+  background:#e5d1aa url("assets/ui/factions.webp") center top/100% auto no-repeat;
+  border:5px ridge #94754b;border-radius:0;
+  color:#3b2a20;box-shadow:0 9px 20px #000a;
+}
+#threatPop h3{
+  margin:0 0 8px;padding:4px;background:#e8d4b5f2;text-align:center;
+  font:normal 25px "IM Fell English",Georgia,serif;
+}
+#threatPop .threat{
+  display:grid;grid-template-columns:minmax(0,1fr) 78px minmax(105px,1fr);align-items:center;
+  gap:6px;margin:0;padding:8px 4px;
+  border-bottom:1px solid #a28a65;background:#eeddbc;
+  font-size:13px;
+}
+#threatPop .threatName{font-weight:bold;min-width:0;overflow-wrap:anywhere}
+#threatPop .threatName:before{content:"";display:inline-block;vertical-align:middle;width:9px;height:9px;margin-right:4px;background:var(--faction);border:1px solid #41312d}
+#threatPop .threatRisk{text-align:center;display:flex;flex-direction:column;gap:1px}
+#threatPop .threatRisk strong{font-size:16px}
+#threatPop .threatRisk em{font-size:11px}
+#threatPop .threat.hot .threatRisk{color:#a33e36}
+#threatPop .threat.dead{opacity:.6}
+#threatPop .threatSoldiers{font-size:12px;text-align:right}
+#threatPop .small{font-size:12px;padding:7px;margin:0;background:#eeddbc}
+#menuPop{
+  position:absolute;right:16px;top:var(--hb-top);z-index:12;
+  display:flex;flex-direction:column;gap:5px;padding:10px;
+  background:#d9c199;border:4px ridge #876944;box-shadow:0 8px 17px #0008;
+}
+#menuPop button{background:#dfc69d;padding:7px;text-align:left;color:#30221b}
+/* WORLD HUD: three separate opaque functional areas; artwork on the outer rail only. */
+#sidebar{
+  position:absolute;inset:auto 0 0 0;width:100%;height:var(--hb-bottom);z-index:6;
+  display:grid;grid-template-columns:clamp(225px,24%,345px) minmax(0,1fr) clamp(248px,24%,345px);
+  grid-template-rows:minmax(0,1fr);gap:9px;align-items:stretch;
+  padding:23px 17px 13px;
+  background:
+    linear-gradient(90deg,#20181d33,#1d171c33),
+    url("assets/ui/hud.webp") center 57%/100% 190% no-repeat,
+    #2c2022;
+  border:0;border-top:4px ridge #9f815a;box-shadow:0 -5px 19px #000b;overflow:hidden;
+}
+#sidebar .sidebarBrand{display:none}
+#sidebar #minimap{
+  grid-column:1;grid-row:1;position:relative;inset:auto;
+  width:100%;height:100%;min-width:0;max-height:none;
+  display:flex;flex-direction:column;gap:0;padding:5px;margin:0;
+  overflow:hidden;background:#19151e;border:4px ridge #93764b;border-radius:0;
+}
+#sidebar #minimap canvas{
+  flex:1 1 auto;display:block;min-height:0;min-width:0;
+  width:100%;height:calc(100% - 38px);max-width:100%;aspect-ratio:auto;object-fit:fill;
+  border:1px solid #977a52;cursor:crosshair;
+}
+#minimap .zoom{position:absolute;z-index:2;right:9px;top:8px;display:flex;flex-direction:column;gap:3px}
+#minimap .zoom button{width:25px;height:25px;min-height:25px;padding:0;background:#e3cd9e;border:1px solid #765836;font-size:17px}
+#minimap .zoomLabel{position:absolute;top:8px;left:7px;z-index:2;background:#e5d5b5db;font-size:11px;padding:2px 4px}
+#sidebar #minimap .mapSite{
+  position:relative;inset:auto;flex:0 0 37px;display:flex;align-items:center;justify-content:center;gap:6px;
+  width:100%;height:37px;min-height:37px;margin:0;padding:3px 5px;
+  background:linear-gradient(#574039,#2d2224);border:2px ridge #a68a5a;color:#f4dbb1;
+  font:12px/1.1 Georgia,serif;white-space:nowrap;overflow:hidden;
+}
+#sidebar .mapSite .siteIcon{font-size:20px;color:#e5c077;flex:0 0 auto}
+#sidebar .mapSite .siteText{display:flex;flex-direction:column;text-align:left;min-width:0}
+#sidebar .mapSite .siteText strong{font:14px/1.1 "IM Fell English",Georgia,serif;white-space:nowrap}
+#sidebar .mapSite .siteText small{font-size:11px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;max-width:220px}
+#sidebar #armyPanel{
+  grid-column:2;grid-row:1;min-width:0;height:100%;min-height:0;
+  display:flex;flex-direction:column;gap:6px;
+  padding:9px 12px;margin:0;overflow:hidden;
+  background:linear-gradient(120deg,#e8d7b7,#cbb28c);
+  border:4px ridge #937653;color:#3a291f;
+}
+#sidebar .hudArmyStrip{flex:0 0 25px;display:flex;align-items:center;gap:6px;min-height:0;overflow-x:auto;overflow-y:hidden}
+#sidebar .hudArmyPill{
+  display:flex;gap:6px;align-items:center;flex:none;min-height:22px;padding:2px 7px;
+  font:12px Georgia,serif;background:#dcc39e;border:1px solid #9f7d55;color:#38291e;white-space:nowrap;
+}
+#sidebar .hudArmyPill.active{background:#653c4e;color:#f5dfb3}
+#sidebar .hudArmyPill small{font-size:10px}
+#sidebar .hudHeroPanel{
+  flex:1 1 auto;min-height:0;min-width:0;display:grid;align-items:stretch;
+  grid-template-columns:clamp(65px,7vw,105px) minmax(100px,.95fr) minmax(160px,1.15fr);gap:9px;overflow:hidden;
+}
+#sidebar .hudPortrait{min-height:0;overflow:hidden;border:3px ridge #8c6b47;background:#302234}
+#sidebar .hudPortrait .portrait{height:100%;width:100%;object-fit:contain;background:transparent;border-radius:0}
+#sidebar .hudIdentity{min-width:0;overflow:hidden;padding-top:3px}
+#sidebar .hudIdentity h2{
+  font:normal clamp(18px,1.8vw,27px)/1.1 "IM Fell English",Georgia,serif;
+  color:#653741;margin:0 0 4px;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;
+}
+#sidebar .hudIdentity h2 small{font:12px Georgia,serif;color:#5b4537}
+#sidebar .hudLocation{font-size:12px;margin:0 0 6px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
+#sidebar .hudMeter{
+  height:22px;position:relative;margin:5px 0;border:3px ridge #856546;background:#231c23;
+  box-shadow:inset 0 0 5px #000;
+}
+#sidebar .hudMeter>span{height:100%;display:block;background:linear-gradient(#7dd265,#356b2a)}
+#sidebar .hudMeter.soul>span{background:linear-gradient(#ac7bdb,#563088)}
+#sidebar .hudMeter>b{position:absolute;inset:0;color:white;text-align:center;font-size:11px;line-height:16px;text-shadow:0 1px 2px #000;white-space:nowrap}
+#sidebar .hudStats{
+  min-width:0;display:grid;grid-template-columns:repeat(2,minmax(0,1fr));align-content:center;
+  gap:3px 6px;padding-left:8px;border-left:1px solid #b59b72;overflow:hidden;
+}
+#sidebar .hudStat{display:grid;grid-template-columns:18px minmax(0,1fr) auto;gap:3px;align-items:center;
+  min-width:0;font-size:11px;border-bottom:1px solid #ac946d77}
+#sidebar .hudStat .statSvg{width:18px;height:18px;stroke:#664e38}
+#sidebar .hudStat span{white-space:nowrap;text-overflow:ellipsis;overflow:hidden}
+#sidebar .hudStat b{white-space:nowrap;font-size:11px}
+#sidebar #worldButtons{
+  grid-column:3;grid-row:1;min-width:0;height:100%;min-height:0;margin:0;padding:6px;
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));grid-template-rows:repeat(2,minmax(0,1fr)) auto;
+  gap:5px;align-content:stretch;
+  border:4px ridge #876645;background:rgba(24,17,21,.94);overflow:hidden;
+}
+#sidebar #worldButtons>button{
+  display:flex;flex-direction:column;align-items:center;justify-content:center;gap:1px;
+  min-width:0;min-height:0;overflow:hidden;margin:0;padding:2px;
+  color:#f4d7aa;text-shadow:0 2px 3px #000;
+  background:linear-gradient(#4e3236,#251c22);border:2px ridge #8f6e4b;
+  font:12px/1.1 Georgia,serif;
+}
+#sidebar #worldButtons .sigilIcon{
+  display:block;flex:0 0 auto;width:clamp(31px,3.4vw,55px);height:clamp(31px,3.4vw,55px);
+  background-image:url("assets/ui/icons.webp");background-repeat:no-repeat;background-size:300% 300%;
+}
+#sidebar #worldButtons .sigilIcon .paintActionIcon,#sidebar #worldButtons .sigilIcon .sigilSvg{display:none}
+#sidebar .sigilIcon[data-sigil="home"]{background-position:0 0}
+#sidebar .sigilIcon[data-sigil="recruit"]{background-position:50% 0}
+#sidebar .sigilIcon[data-sigil="build"]{background-position:100% 0}
+#sidebar .sigilIcon[data-sigil="inventory"]{background-position:0 50%}
+#sidebar .sigilIcon[data-sigil="rest"]{background-position:50% 50%}
+#sidebar .sigilIcon[data-sigil="menu"]{background-position:100% 50%}
+#sidebar #worldButtons #btnGo{grid-column:1/-1;min-height:24px;background:#5f374b;border:2px ridge #b69362;font-size:12px}
+#sidebar #worldButtons .badge{position:absolute;top:2px;right:2px;padding:1px 3px;font-size:10px;
+  color:#fff;background:#773958;border:1px solid #c9a16b;border-radius:0}
+/* Selection, menus and readable overlays respect top and bottom bars */
+#info{
+  position:absolute;top:calc(var(--hb-top) + 14px);right:12px;bottom:calc(var(--hb-bottom) + 10px);
+  width:min(320px,29vw);max-height:calc(100vh - var(--hb-top) - var(--hb-bottom) - 25px);
+  overflow:auto;padding:14px;z-index:5;
+  border:5px ridge #8f7049;border-radius:0;
+  background:repeating-linear-gradient(100deg,#54321a08 0 3px,transparent 3px 11px),#e6d4b2;
+  color:#382a1f;box-shadow:0 10px 18px #0006;
+}
+#info h2{font:normal 24px/1.1 "IM Fell English",Georgia,serif;margin:0 0 6px;padding-right:26px}
+#info .close{position:absolute;right:6px;top:6px}
+#info .buttons button{background:#d9b98b}
+#hint{display:none!important}
+/* Universal modal shell: art is ONLY a shallow crest strip, not another set of slots. */
+.modal{background:#130d13b8;backdrop-filter:blur(3px)}
+.modal .panel{border-radius:0;box-shadow:0 15px 40px #000a}
+#modalBody.hb-build-modal,#modalBody.hb-recruit-modal,#modalBody.hb-inventory-modal{
+  --crest:url("assets/ui/build.webp");
+  position:relative;display:flex;flex-direction:column;
+  gap:9px;width:min(1230px,calc(100vw - 32px));max-width:min(1230px,calc(100vw - 32px));
+  height:auto;max-height:calc(100vh - 28px);min-width:0;
+  overflow-y:auto;overflow-x:hidden;isolation:isolate;
+  padding:112px 18px 15px;
+  background:linear-gradient(#3a2627,#291c1f);border:7px ridge #846747;
+  border-radius:0;clip-path:none;box-shadow:0 18px 55px #000e;
+  color:#32251d;
+}
+#modalBody.hb-recruit-modal{--crest:url("assets/ui/recruit.webp")}
+#modalBody.hb-inventory-modal{--crest:url("assets/ui/inventory.webp")}
+#modalBody.hb-build-modal:before,#modalBody.hb-recruit-modal:before,#modalBody.hb-inventory-modal:before{
+  content:"";position:absolute;left:0;right:0;top:0;height:105px;pointer-events:none;z-index:0;
+  background-image:var(--crest);background-repeat:no-repeat;background-position:center top;
+  background-size:100% auto;
+}
+#modalBody.hb-build-modal>*,
+#modalBody.hb-recruit-modal>*,
+#modalBody.hb-inventory-modal>*{position:relative;z-index:1}
+#modalBody .modalClose{position:absolute!important;right:11px;top:11px;
+  z-index:3;width:30px;height:30px;min-height:30px;margin:0;padding:0;
+  color:#f5d8ad;background:#6a3644;border:2px ridge #bc9564;font:23px/25px Georgia,serif}
+#modalBody .screenTitle{
+  display:flex;align-items:center;justify-content:center;gap:10px;flex:0 0 auto;min-height:39px;
+  padding:4px 9px;margin:0;border:2px ridge #ab8558;
+  background:linear-gradient(#752f40,#3c1d29);color:#f5dbab;
+}
+#modalBody .screenTitle h2{
+  margin:0;padding:0;border:0;font:normal clamp(21px,2.1vw,29px)/1.2 "IM Fell English",Georgia,serif;color:#f5d9a5;
+}
+#modalBody .screenTitle>span{font-size:19px}
+#modalBody .stickyRes{
+  display:flex;align-items:center;justify-content:center;flex-wrap:wrap;gap:7px;
+  flex:0 0 auto;min-height:35px;margin:0;padding:5px 12px;position:relative;top:auto;z-index:1;
+  font-size:13px;line-height:1.2;background:#e7d2a9;border:2px ridge #ae8a57;color:#3c2b20;
+}
+#modalBody .screenFoot{
+  font:italic 12px/1.25 Georgia,serif;color:#e3cca8;text-align:center;margin:0;padding:3px;
+}
+#modalBody .buttons{display:flex;flex:0 0 auto;justify-content:flex-end;margin:0;padding:0;border:0;gap:8px}
+#modalBody .buttons button,#modalBody .primary{
+  min-height:34px;padding:5px 11px;border:2px ridge #b58a57;border-radius:0;
+  background:linear-gradient(#73384a,#3b1f31);color:#f3d9b0;font:14px Georgia,serif;
+}
+#modalBody .buttons button:hover,#modalBody .primary:hover{filter:brightness(1.1)}
+/* REAL interactive recruiting cards sit on ONE dark panel, no prepainted ghost slots. */
+#modalBody.hb-recruit-modal .recruitTabs{
+  display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px;margin:0;min-height:38px;
+}
+#modalBody .recruitTabs button{
+  min-width:0;min-height:40px;padding:5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;
+  background:linear-gradient(#563b31,#282023);color:#f3d7aa;border:2px ridge #ad8654;
+  font:clamp(13px,1.45vw,18px) "IM Fell English",Georgia,serif;
+}
+#modalBody .recruitTabs button.active{background:linear-gradient(#823a4b,#4c2430);border-color:#e2b66f}
+#modalBody .recruitTabs button span{font-size:11px}
+#modalBody .recruitScreen{
+  display:grid;grid-template-columns:minmax(0,1.13fr) minmax(0,.95fr);
+  gap:10px;min-height:0;align-items:stretch;
+}
+#modalBody .unitGrid{
+  min-width:0;min-height:300px;max-height:min(44vh,395px);
+  display:grid;grid-template-columns:repeat(4,minmax(0,1fr));grid-auto-rows:minmax(122px,auto);
+  align-content:start;gap:7px;overflow:auto;padding:9px;
+  background:#211a22;border:4px ridge #9a7650;
+}
+#modalBody .unitTile{
+  display:flex;flex-direction:column;align-items:center;justify-content:flex-start;gap:3px;
+  min-width:0;min-height:122px;margin:0;padding:5px 3px;
+  background:#352832;border:2px ridge #906f4b;color:#f4dfb9;overflow:hidden;text-align:center;
+}
+#modalBody .unitTile.selected{outline:2px solid #e9bb73;outline-offset:-2px;background:#4d3138}
+#modalBody .unitTile.unknown .portrait,#modalBody .unitTile.unavailable .portrait{filter:grayscale(1) brightness(.5)}
+#modalBody .unitTile .portrait{
+  display:block;flex:0 0 66px;width:68px;height:66px;min-height:0;
+  background:#1e1a23;border:1px solid #ad8654;border-radius:0;object-fit:contain;
+}
+#modalBody .unitTileName{font:15px/1.1 "IM Fell English",Georgia,serif}
+#modalBody .unitTile small{font:10px/1.12 Georgia,serif;color:#e9c9a3;overflow-wrap:anywhere}
+#modalBody .unitTile small.unitReady{color:#9bdc92}
+#modalBody .recruitInspector{
+  min-width:0;max-height:min(44vh,395px);min-height:300px;overflow:auto;
+  padding:11px;background:#e8d1a8;border:4px ridge #9b764a;color:#36271f;
+}
+#modalBody .recruitSelectedHead{display:flex;align-items:flex-start;gap:9px;padding-bottom:7px;border-bottom:1px solid #a98e65;min-width:0}
+#modalBody .recruitSelectedHead>.portrait{width:80px;height:90px;flex:0 0 80px;object-fit:contain;background:#382b38;border:3px ridge #9d764b;border-radius:0}
+#modalBody .recruitSelectedHead>div{min-width:0}
+#modalBody .recruitSelectedHead h3{margin:0;font:normal 25px "IM Fell English",Georgia,serif;color:#5d3342}
+#modalBody .recruitSelectedHead p{font:italic 12px/1.3 Georgia,serif;margin:4px 0}
+#modalBody .recruitStats{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:4px;margin:9px 0}
+#modalBody .recruitStat{
+  min-width:0;display:grid;grid-template-columns:19px minmax(0,1fr) auto;
+  align-items:center;gap:4px;padding:4px;background:#d8bd93;border-bottom:1px solid #ac8a5c;font-size:12px;
+}
+#modalBody .recruitStat .statSvg{width:19px;height:19px;stroke:#5c4332}
+#modalBody .recruitStat b{overflow-wrap:anywhere;font-size:12px;text-align:right}
+#modalBody .recruitCost{display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:6px;padding:6px 0;border-top:1px solid #a88a5b;font-size:13px}
+#modalBody .recruitRequirement{padding:6px;background:#deb99d;color:#812d31;font-weight:bold;font-size:12px}
+#modalBody .recruitPurchase{display:flex;align-items:center;flex-wrap:wrap;gap:5px;margin-top:7px;font-size:12px}
+#modalBody .recruitPurchase input{width:65px;min-height:32px;padding:3px}
+#modalBody .recruitPurchase button{min-height:33px;padding:4px 7px;background:#d8b98e;color:#36271f}
+#modalBody .recruitPurchase button.primary{background:linear-gradient(#743444,#3d2232);color:#f2d7b2;margin-left:auto}
+/* Bauen — entirely real tile grid and details, both opaque. */
+#modalBody .buildScreen{display:grid;grid-template-columns:minmax(0,1.05fr) minmax(0,1fr);gap:10px;min-height:0}
+#modalBody .buildingSelection,#modalBody .buildingInspector{
+  min-width:0;min-height:315px;max-height:min(52vh,465px);overflow:auto;
+  padding:11px;background:#e5cfaa;border:4px ridge #98754b;
+}
+#modalBody .buildingSelection>h3,#modalBody .buildingInspector>h3{
+  margin:0 0 8px;padding-bottom:4px;font:normal 22px "IM Fell English",Georgia,serif;color:#5c3740;
+  border-bottom:1px solid #b09671;
+}
+#modalBody .buildingTileGrid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px}
+#modalBody .buildingTile{
+  display:grid;grid-template-columns:65px minmax(0,1fr);align-items:center;gap:6px;
+  min-height:85px;min-width:0;padding:5px;text-align:left;background:#d6b990;border:2px ridge #987751;color:#38291e;
+}
+#modalBody .buildingTile.selected{background:#69424a;border-color:#e2b875;color:#fff0c9}
+#modalBody .buildingTile.locked{opacity:.72}
+#modalBody .tileArtwork{display:block;width:65px;height:71px;overflow:hidden;border:2px ridge #99774d;background:#1b171d}
+#modalBody .tileArtwork .hbPainting{display:block;width:100%;height:100%}
+#modalBody .tileCopy{display:flex;flex-direction:column;min-width:0;gap:2px;overflow-wrap:anywhere}
+#modalBody .tileCopy strong{font:normal 17px/1.07 "IM Fell English",Georgia,serif}
+#modalBody .tileCopy em{font-size:11px}
+#modalBody .tileCopy small{font-size:10px}
+#modalBody .buildingHeroArt{
+  display:grid;place-items:center;height:clamp(115px,18vh,172px);width:100%;margin:0 0 8px;
+  overflow:hidden;border:3px ridge #997951;background:#2f242b;
+}
+#modalBody .buildingHeroArt .hbPainting{display:block;height:100%;width:100%;max-width:none}
+#modalBody .buildingInspector>h3 small{font-size:12px;float:right}
+#modalBody .buildingFact{display:grid;grid-template-columns:120px minmax(0,1fr);gap:6px;padding:7px 3px;
+  border-bottom:1px solid #ad9064;font-size:13px}
+#modalBody .buildingFact>b{color:#6b3a40}
+#modalBody .buildingFact.next{background:#efdeb9}
+#modalBody .buildingRequirements{display:flex;justify-content:space-between;flex-wrap:wrap;gap:6px;padding:9px 0;border-bottom:1px solid #af9068;font-size:12px}
+#modalBody .buildingCommand{display:flex;justify-content:flex-end;gap:7px;margin:8px 0}
+#modalBody .upgradesHeading{font-size:19px!important;margin:6px 0!important}
+#modalBody .upgradeTileGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+#modalBody .upgradeTile{display:flex;flex-direction:column;align-items:center;gap:3px;min-width:0;min-height:85px;
+  padding:5px 3px;background:#d6b991;border:2px ridge #987951;color:#35281f}
+#modalBody .upgradeArt{display:grid;place-items:center;width:36px;height:36px;flex:none;font-size:23px;color:#f0c5f4;
+  background:#3a253c;border:2px ridge #92744e;border-radius:50%}
+#modalBody .upgradeTile small,#modalBody .upgradeName{font-size:11px;text-align:center;overflow-wrap:anywhere}
+#modalBody .upgradeTile.owned{opacity:.8}
+#modalBody .upgradeTile.locked{opacity:.58}
+#modalBody .buildBlocked{color:#873532;font-size:12px}
+/* Inventory: one real equipment grid; no painted duplicate sockets. */
+#modalBody .inventoryScreen{
+  display:grid;grid-template-columns:minmax(0,.8fr) minmax(0,1fr) minmax(0,1.03fr);
+  min-height:0;gap:10px;align-items:stretch;
+}
+#modalBody .inventoryScreen>section{
+  min-width:0;min-height:350px;max-height:min(52vh,475px);overflow:auto;
+  padding:10px;background:#e6d0a8;border:4px ridge #98754b;
+}
+#modalBody .inventoryScreen h3{
+  margin:0 0 8px;padding-bottom:4px;font:normal 21px "IM Fell English",Georgia,serif;color:#613944;
+  border-bottom:1px solid #b2986e;
+}
+#modalBody .inventoryScreen h3 small{font:12px Georgia,serif;color:#715a3f}
+#modalBody .lichShowcase{text-align:center}
+#modalBody .lichPortraitLarge{
+  height:clamp(160px,29vh,278px);display:grid;place-items:center;
+  background:#2b2132;border:3px ridge #95764f;overflow:hidden;
+}
+#modalBody .lichPortraitLarge .portrait{width:100%;height:100%;object-fit:contain;background:transparent;border-radius:0}
+#modalBody .lichTitle{margin:8px 0!important;font:normal 22px "IM Fell English",Georgia,serif!important}
+#modalBody .lichShowcase p:not(.lichTitle){font-size:12px;line-height:1.3}
+#modalBody .equipRune{display:none}
+#modalBody .artifactSlots{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:7px;margin:0 0 12px}
+#modalBody .artifactSlot{
+  min-width:0;min-height:80px;display:flex;flex-direction:column;align-items:center;justify-content:center;
+  gap:3px;padding:5px;background:#312431;border:2px ridge #96794e;color:#ead6af;text-align:center;
+}
+#modalBody .artifactSlot.empty{opacity:.75}
+#modalBody .artifactSlot .artifactGlyph{font-size:27px;color:#ce98dd}
+#modalBody .artifactSlot b,#modalBody .artifactSlot small{font-size:11px}
+#modalBody .relicBonuses{display:flex;flex-direction:column;gap:4px}
+#modalBody .relicBonus{display:flex;justify-content:space-between;gap:6px;padding:5px;border-bottom:1px solid #ae946b;font-size:12px}
+#modalBody .artifactInventoryGrid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:6px}
+#modalBody .artifactInventoryTile{display:flex;flex-direction:column;justify-content:center;align-items:center;gap:3px;min-height:84px;
+  min-width:0;padding:4px;background:#312532;color:#f0d9ab;border:2px ridge #98764c;text-align:center}
+#modalBody .artifactInventoryTile .artifactGlyph{font-size:25px}
+#modalBody .artifactInventoryTile b,#modalBody .artifactInventoryTile small{font-size:11px;overflow-wrap:anywhere}
+#modalBody .artifactInventoryTile.equipped{outline:2px solid #e6b66e;outline-offset:-2px}
+@media(max-width:1250px){
+  :root{--hb-bottom:205px}
+  #sidebar{grid-template-columns:clamp(185px,23%,280px) minmax(0,1fr) clamp(190px,24%,280px);gap:6px;padding:19px 9px 9px}
+  #sidebar .hudHeroPanel{grid-template-columns:68px minmax(95px,1fr)}
+  #sidebar .hudStats{display:none}
+  #sidebar #worldButtons{gap:3px}
+  #sidebar #worldButtons .sigilIcon{width:34px;height:34px}
+  #bottomBar #resources{height:49px}
+  #modalBody .unitGrid{grid-auto-rows:minmax(112px,auto)}
+}
+@media(max-width:980px){
+  :root{--hb-top:116px;--hb-bottom:190px}
+  #header #bottomBar{
+    grid-template-columns:minmax(91px,12%) minmax(110px,13%) minmax(0,1fr);
+    grid-template-rows:40px 46px;column-gap:5px;row-gap:2px;
+    padding:7px 9px 8px;height:var(--hb-top);
+    background-size:100% 280%;
+  }
+  #bottomBar #threatChip{grid-area:1/1}
+  #bottomBar #btnNews{grid-area:1/2}
+  #bottomBar #hbBrand{grid-area:1/3}
+  #bottomBar #resources{grid-area:2/1/3/4;height:43px;width:100%;max-width:100%}
+  #resources .chip .lbl{font-size:11px}
+  #resources .chip b{font-size:13px}
+  #sidebar{grid-template-columns:140px minmax(0,1fr) 160px;gap:4px;padding:12px 4px 5px}
+  #sidebar #minimap{padding:3px}
+  #sidebar .mapSite .siteText{display:none}
+  #sidebar .hudHeroPanel{grid-template-columns:40px minmax(0,1fr);gap:3px}
+  #sidebar .hudArmyPill small{display:none}
+  #sidebar .hudIdentity h2{font-size:16px}
+  #sidebar .hudMeter{height:19px}
+  #sidebar #worldButtons{padding:2px;gap:2px}
+  #sidebar #worldButtons>button{font-size:10px}
+  #sidebar #worldButtons .sigilIcon{height:29px;width:29px}
+  #modalBody.hb-recruit-modal .recruitScreen,#modalBody.hb-build-modal .buildScreen,
+  #modalBody.hb-inventory-modal .inventoryScreen{grid-template-columns:1fr}
+  #modalBody .unitGrid{grid-template-columns:repeat(4,minmax(0,1fr));max-height:290px;min-height:0}
+  #modalBody .recruitInspector,#modalBody .buildingSelection,#modalBody .buildingInspector,
+  #modalBody .inventoryScreen>section{max-height:300px;min-height:0}
+  #modalBody .inventoryScreen>section{max-height:280px}
+  #info{width:245px}
+}
+@media(max-width:570px){
+  :root{--hb-top:119px;--hb-bottom:165px}
+  #header #bottomBar{grid-template-columns:88px 95px minmax(0,1fr);padding:5px}
+  #bottomBar #threatChip,#bottomBar #btnNews{font-size:11px}
+  #hbBrand>span{font-size:19px}
+  #sidebar{grid-template-columns:95px minmax(0,1fr) 114px}
+  #sidebar .hudPortrait{display:none}
+  #sidebar .hudHeroPanel{grid-template-columns:1fr}
+  #sidebar .hudArmyStrip{flex-basis:18px}
+  #sidebar .hudLocation{font-size:10px}
+  #sidebar #worldButtons .sigilIcon{height:22px;width:22px}
+  #sidebar #worldButtons>button{font-size:9px}
+  #modalBody.hb-build-modal,#modalBody.hb-recruit-modal,#modalBody.hb-inventory-modal{
+    padding:81px 9px 10px;width:calc(100vw - 10px);max-width:calc(100vw - 10px)
+  }
+  #modalBody .unitGrid{grid-template-columns:repeat(2,minmax(0,1fr))}
+  #modalBody .buildingTileGrid{grid-template-columns:1fr}
+  #modalBody .inventoryScreen{grid-template-columns:1fr}
+  #modalBody .recruitStats{grid-template-columns:1fr}
+  #info{right:4px;width:min(245px,90vw)}
+}
