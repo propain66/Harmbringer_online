@@ -503,3 +503,94 @@
   #modalBody .recruitStats{grid-template-columns:1fr}
   #info{right:4px;width:min(245px,90vw)}
 }
+
+
+/* Illustrated action / construction sprites, 14 original painted motifs.
+   The sprites are artwork only: labels, levels, requirements and clicks stay live.
+   Column positions: 0, 50, 100%; row positions: 0, 25, 50, 75, 100%. */
+:root{--hb-illustrations:url("assets/ui/illustrated-sprites.webp")}
+
+/* Fill the command tiles instead of leaving small floating medallions. */
+#sidebar #worldButtons>button{
+  position:relative!important;gap:1px!important;
+  padding:3px 2px 5px!important;justify-content:flex-end!important;
+  line-height:1.04!important;
+}
+#sidebar #worldButtons .ic.sigilIcon[data-sigil]{
+  display:block!important;flex:1 1 auto!important;
+  align-self:center!important;
+  width:min(96%,105px)!important;
+  height:calc(100% - 18px)!important;
+  max-height:110px!important;min-height:0!important;
+  margin:0 auto 1px!important;
+  background-image:var(--hb-illustrations)!important;
+  background-size:300% 500%!important;
+  background-repeat:no-repeat!important;
+  border:0!important;
+  filter:drop-shadow(0 2px 2px #070406)!important;
+}
+#sidebar #worldButtons .sigilIcon .sigilSvg,
+#sidebar #worldButtons .sigilIcon .paintActionIcon{display:none!important}
+#sidebar #worldButtons .sigilIcon[data-sigil="home"]{background-position:0% 0%!important}
+#sidebar #worldButtons .sigilIcon[data-sigil="recruit"]{background-position:50% 0%!important}
+#sidebar #worldButtons .sigilIcon[data-sigil="build"]{background-position:100% 0%!important}
+#sidebar #worldButtons .sigilIcon[data-sigil="rest"]{background-position:0% 25%!important}
+#sidebar #worldButtons .sigilIcon[data-sigil="inventory"]{background-position:50% 25%!important}
+#sidebar #worldButtons .sigilIcon[data-sigil="menu"]{background-position:100% 25%!important}
+#sidebar #worldButtons>button .badge{top:2px!important;right:2px!important;z-index:2!important}
+
+/* All eight construction tiles use the new imagery, not the old hand-drawn SVG. */
+#modalBody.hb-build-modal .buildingTile .tileArtwork{
+  display:block!important;
+  width:68px!important;height:73px!important;flex:0 0 68px!important;
+  padding:0!important;overflow:hidden!important;
+  background-image:var(--hb-illustrations)!important;
+  background-size:300% 500%!important;
+  background-repeat:no-repeat!important;
+  background-color:#261c2d!important;
+  border:2px ridge #946a45!important;
+}
+#modalBody.hb-build-modal .tileArtwork>.hbPainting,
+#modalBody.hb-build-modal .tileArtwork>svg{display:none!important}
+#modalBody .buildingTile[data-building="phylactery"] .tileArtwork{background-position:0% 50%!important}
+#modalBody .buildingTile[data-building="boneWorkshop"] .tileArtwork{background-position:50% 50%!important}
+#modalBody .buildingTile[data-building="corpsePit"] .tileArtwork{background-position:100% 50%!important}
+#modalBody .buildingTile[data-building="soulKennel"] .tileArtwork{background-position:0% 75%!important}
+#modalBody .buildingTile[data-building="deadHall"] .tileArtwork{background-position:50% 75%!important}
+#modalBody .buildingTile[data-building="knowledgeAltar"] .tileArtwork{background-position:100% 75%!important}
+#modalBody .buildingTile[data-building="boneForge"] .tileArtwork{background-position:0% 100%!important}
+#modalBody .buildingTile[data-building="heathAltar"] .tileArtwork{background-position:50% 100%!important}
+#modalBody .buildingTile.selected .tileArtwork{border-color:#d4aa6c!important}
+#modalBody .buildingTile.locked .tileArtwork{filter:grayscale(.5) brightness(.82)!important}
+
+/* Large preview shows the same selected building, without distorting its sprite. */
+#modalBody.hb-build-modal .buildingHeroArt{
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  background:radial-gradient(#5d4153,#1f1923)!important;
+  border:3px ridge #a48050!important;
+}
+#modalBody.hb-build-modal .buildingHeroArt>.hbPainting,
+#modalBody.hb-build-modal .buildingHeroArt>svg{display:none!important}
+#modalBody.hb-build-modal .buildingHeroArt:before{
+  content:"";display:block;
+  height:min(96%,167px);aspect-ratio:1/1;flex:none;
+  background:var(--hb-illustrations) no-repeat;
+  background-size:300% 500%;
+  border:2px ridge #b79562;
+}
+#modalBody .buildingHeroArt[data-building="phylactery"]:before{background-position:0% 50%}
+#modalBody .buildingHeroArt[data-building="boneWorkshop"]:before{background-position:50% 50%}
+#modalBody .buildingHeroArt[data-building="corpsePit"]:before{background-position:100% 50%}
+#modalBody .buildingHeroArt[data-building="soulKennel"]:before{background-position:0% 75%}
+#modalBody .buildingHeroArt[data-building="deadHall"]:before{background-position:50% 75%}
+#modalBody .buildingHeroArt[data-building="knowledgeAltar"]:before{background-position:100% 75%}
+#modalBody .buildingHeroArt[data-building="boneForge"]:before{background-position:0% 100%}
+#modalBody .buildingHeroArt[data-building="heathAltar"]:before{background-position:50% 100%}
+@media(max-width:980px){
+  #sidebar #worldButtons .ic.sigilIcon[data-sigil]{max-height:68px!important}
+  #modalBody.hb-build-modal .buildingTile .tileArtwork{width:61px!important;height:65px!important;flex-basis:61px!important}
+}
+@media(max-width:570px){
+  #sidebar #worldButtons .ic.sigilIcon[data-sigil]{max-height:39px!important;width:96%!important}
+  #modalBody.hb-build-modal .buildingTile .tileArtwork{width:65px!important;height:67px!important;flex-basis:65px!important}
+}
