@@ -1,0 +1,498 @@
+/*
+  Harmbringer — layout repair for hand-painted RTS assets.
+  Separates decorative artwork from live controls so there are no doubled
+  icon wells, text over skulls or overlapping recruit cards.
+  Keep interactions and live game numbers unchanged.
+*/
+:root{--hb-hud-height:clamp(210px,26vh,250px);--hb-header-height:90px}
+
+/* The PNG/WebP art sheets contain transparent vertical margins.
+   Crop *by CSS presentation* rather than compressing the art into tiny ribbons. */
+#header #bottomBar{
+  top:0!important;bottom:auto!important;left:0!important;right:0!important;
+  height:var(--hb-header-height)!important;width:100%!important;
+  background-image:var(--hb-asset-top)!important;
+  background-size:100% 200%!important;
+  background-position:center center!important;
+  background-repeat:no-repeat!important;
+  display:flex!important;
+  justify-content:flex-start!important;align-items:center!important;
+  gap:10px!important;
+  padding:10px 19px!important;
+  overflow:visible!important;
+}
+#header #bottomBar #threatChip,#header #bottomBar #btnNews{
+  position:relative!important;top:auto!important;
+  flex:0 0 135px!important;min-width:0!important;
+  height:38px!important;margin:8px 0 0!important;
+  padding:2px 7px!important;
+  color:#f6ddb1!important;
+  background:linear-gradient(#422835f5,#241d21f5)!important;
+  border:2px ridge #b39361!important;
+  font-size:15px!important;
+  text-align:center!important;
+  line-height:1.05!important;
+  white-space:normal!important;
+}
+#header #bottomBar #btnNews{order:1!important}
+#header #bottomBar #threatChip{order:0!important}
+#header #bottomBar #hbBrand{
+  position:absolute!important;
+  left:50%!important;top:17px!important;
+  transform:translateX(-50%)!important;
+  width:21%!important;height:47px!important;min-width:0!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  padding:0!important;pointer-events:none!important;
+  z-index:2!important;
+}
+#hbBrand>span{
+  color:#ffdfac!important;
+  font:normal clamp(18px,2.25vw,37px)/1.1 "IM Fell English",Georgia,serif!important;
+  white-space:nowrap;
+  text-shadow:0 2px 3px #190809,0 0 5px #190809!important;
+}
+#header #bottomBar #resources{
+  order:3!important;display:flex!important;align-items:center!important;
+  justify-content:space-between!important;
+  position:relative!important;align-self:center!important;
+  margin:4px 0 0 auto!important;
+  flex:0 0 36%!important;width:36%!important;max-width:36%!important;
+  height:48px!important;min-width:0!important;gap:1px!important;
+  padding:0 5px!important;
+  background:rgba(23,14,14,.55)!important;
+  border:1px solid #98764d!important;
+}
+#header #resources .chip{
+  flex:1 1 0!important;min-width:0!important;
+  width:auto!important;
+  display:flex!important;flex-direction:column!important;
+  align-items:center!important;justify-content:center!important;
+  gap:1px!important;padding:3px 1px!important;height:46px!important;
+  border:0!important;background:transparent!important;
+  overflow:hidden;text-align:center!important;
+}
+#header #resources .chip .lbl{
+  display:block!important;font:11px/1.05 Georgia,serif!important;
+  color:#f6dab1!important;white-space:nowrap!important;
+}
+#header #resources .chip b{
+  color:#f7d071!important;font:bold clamp(12px,1vw,18px)/1.2 Georgia,serif!important;
+  overflow:hidden;text-overflow:ellipsis;
+}
+#header #bottomBar #status{
+  position:absolute!important;
+  top:calc(var(--hb-header-height) + 4px)!important;right:8px!important;
+  display:flex!important;z-index:2!important;
+  color:#f4dfb4!important;
+}
+#header #bottomBar #timeDelta{position:absolute!important;top:calc(var(--hb-header-height) + 4px)!important}
+
+/* Bottom HUD. The transparent strip occupies about the top 18% of the image.
+   Crop it and give content explicit opaque backplates. */
+#sidebar{
+  position:absolute!important;top:auto!important;bottom:0!important;
+  left:0!important;right:0!important;
+  width:100%!important;height:var(--hb-hud-height)!important;
+  display:grid!important;
+  grid-template-columns:clamp(250px,23vw,355px) minmax(0,1fr) clamp(260px,22vw,360px)!important;
+  align-items:stretch!important;gap:10px!important;
+  padding:30px 21px 18px!important;
+  background-image:var(--hb-asset-bottom)!important;
+  background-size:100% 125%!important;
+  background-position:center bottom!important;
+  background-repeat:no-repeat!important;
+  background-color:#261c20!important;
+  border:0!important;
+  box-shadow:0 -4px 15px #0009!important;
+}
+#sidebar.hidden{display:none!important}
+#sidebar #minimap{
+  position:relative!important;order:1!important;
+  grid-column:1!important;
+  display:flex!important;flex-direction:column!important;
+  flex:none!important;
+  width:100%!important;height:100%!important;min-width:0!important;
+  max-height:none!important;
+  margin:0!important;padding:7px!important;
+  border:4px ridge #a48959!important;
+  background:#231b24!important;
+  box-shadow:inset 0 0 8px #000e!important;
+  overflow:hidden!important;
+}
+#sidebar #minimap canvas{
+  display:block!important;flex:1 1 auto!important;
+  min-height:0!important;width:100%!important;
+  height:calc(100% - 39px)!important;max-width:none!important;
+  object-fit:fill!important;image-rendering:auto;
+  border:1px solid #93784f!important;
+  background:#161417!important;
+}
+#sidebar #minimap .mapSite{
+  position:relative!important;inset:auto!important;
+  display:flex!important;flex:0 0 38px!important;align-items:center!important;
+  gap:7px!important;width:100%!important;height:38px!important;
+  min-height:38px!important;margin:0!important;padding:3px 7px!important;
+  color:#f4d7ac!important;
+  border:2px ridge #bb9762!important;
+  background:linear-gradient(#563c32,#251d20)!important;
+  font:12px/1.1 Georgia,serif!important;
+}
+#sidebar #minimap .mapSite .siteText{display:flex!important;min-width:0}
+#sidebar #minimap .mapSite .siteText small{
+  max-width:210px!important;overflow:hidden!important;text-overflow:ellipsis!important;
+}
+#sidebar #minimap .zoom{z-index:5!important}
+#sidebar #armyPanel{
+  position:relative!important;order:2!important;grid-column:2!important;
+  display:flex!important;flex-direction:column!important;min-width:0!important;
+  height:100%!important;width:100%!important;gap:7px!important;
+  margin:0!important;padding:11px 14px!important;overflow:hidden!important;
+  background:linear-gradient(105deg,rgba(237,216,179,.96),rgba(203,169,122,.96))!important;
+  border:4px ridge #9a784c!important;
+  box-shadow:inset 0 0 0 1px #61442c!important;color:#342820!important;
+}
+#sidebar #armyPanel.hidden{display:none!important}
+#sidebar .hudArmyStrip{
+  flex:0 0 25px!important;min-height:25px!important;
+  display:flex!important;align-items:center!important;gap:6px!important;
+  overflow-x:auto!important;overflow-y:hidden!important;
+}
+#sidebar .hudArmyPill{font-size:12px!important;min-height:22px!important}
+#sidebar .hudHeroPanel{
+  flex:1 1 auto!important;min-height:0!important;
+  display:grid!important;
+  grid-template-columns:clamp(68px,6.6vw,108px) minmax(125px,1fr) minmax(190px,1.1fr)!important;
+  gap:12px!important;align-items:stretch!important;
+  overflow:hidden!important;
+}
+#sidebar .hudPortrait{
+  min-width:0!important;min-height:0!important;
+  background:radial-gradient(#483344,#19171c)!important;
+  border:3px ridge #917149!important;overflow:hidden!important;
+}
+#sidebar .hudPortrait .portrait{width:100%!important;height:100%!important;object-fit:contain!important}
+#sidebar .hudIdentity{padding:3px 0!important;min-width:0!important;overflow:hidden!important}
+#sidebar .hudIdentity h2{font-size:clamp(18px,1.6vw,25px)!important;margin:0 0 2px!important}
+#sidebar .hudLocation{font-size:12px!important;margin:0 0 7px!important}
+#sidebar .hudMeter{height:23px!important;margin:5px 0!important}
+#sidebar .hudStats{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  align-content:center!important;gap:2px 8px!important;
+  margin:0!important;padding:3px 0 3px 11px!important;
+  border-left:1px solid #a18b68!important;overflow:hidden!important;
+}
+#sidebar .hudStat{font-size:12px!important}
+#sidebar #worldButtons{
+  order:3!important;grid-column:3!important;
+  display:grid!important;
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+  grid-template-rows:repeat(2,minmax(0,1fr)) auto!important;
+  gap:5px!important;
+  align-content:stretch!important;
+  width:100%!important;height:100%!important;
+  min-width:0!important;flex:none!important;
+  margin:0!important;padding:5px!important;
+  background:rgba(29,20,24,.88)!important;
+  border:4px ridge #866540!important;
+  overflow:hidden!important;
+}
+#sidebar #worldButtons.hidden{display:none!important}
+#sidebar #worldButtons>button{
+  display:flex!important;align-items:center!important;
+  justify-content:center!important;flex-direction:column!important;
+  min-width:0!important;min-height:0!important;
+  margin:0!important;padding:3px 2px!important;
+  font:12px/1.08 Georgia,serif!important;
+  color:#f4d8ad!important;
+  background:linear-gradient(#4b3032,#231b20)!important;
+  border:2px ridge #866444!important;
+  box-shadow:inset 0 0 5px #000b!important;
+  overflow:hidden!important;
+}
+#sidebar #worldButtons>button:disabled{opacity:.55!important}
+#sidebar #worldButtons .sigilIcon[data-sigil]{
+  width:clamp(38px,3.7vw,60px)!important;height:clamp(38px,3.7vw,60px)!important;
+  flex:none!important;
+}
+#sidebar #worldButtons #btnGo{grid-column:1/-1!important;min-height:23px!important;font-size:12px!important}
+#info{
+  top:calc(var(--hb-header-height) + 20px)!important;
+  bottom:calc(var(--hb-hud-height) + 10px)!important;
+  right:16px!important;max-height:calc(100vh - var(--hb-hud-height) - var(--hb-header-height) - 40px)!important;
+  width:min(310px,25vw)!important;
+}
+#threatPop{top:calc(var(--hb-header-height) + 4px)!important;left:12px!important}
+
+/* Modal art is a frame, NOT a layout engine. Only live game controls may fill it.
+   The painted blank slots below must be covered with opaque game surfaces. */
+#modal{
+  align-items:center!important;justify-content:center!important;
+  padding:12px!important;
+}
+#modalBody.hb-build-modal,#modalBody.hb-recruit-modal,#modalBody.hb-inventory-modal{
+  position:relative!important;
+  display:flex!important;flex-direction:column!important;
+  width:min(1370px,calc(100vw - 32px))!important;
+  max-width:min(1370px,calc(100vw - 32px))!important;
+  max-height:calc(100vh - 24px)!important;
+  min-width:0!important;min-height:0!important;
+  height:auto!important;
+  overflow-y:auto!important;overflow-x:hidden!important;
+  padding:clamp(95px,13vh,125px) clamp(27px,3.3vw,48px) 22px!important;
+  border:0!important;box-shadow:0 12px 35px #000b!important;
+  border-radius:0!important;clip-path:none!important;
+  background-size:100% 100%!important;
+  background-position:center!important;
+  background-repeat:no-repeat!important;
+}
+#modalBody.hb-build-modal:before,#modalBody.hb-recruit-modal:before,
+#modalBody.hb-inventory-modal:before{content:none!important}
+#modalBody .modalClose{
+  position:absolute!important;top:clamp(23px,3vw,42px)!important;right:clamp(19px,2.7vw,37px)!important;
+  z-index:12!important;float:none!important;
+  width:36px!important;height:36px!important;margin:0!important;
+  background:linear-gradient(#69333c,#351d2b)!important;
+  color:#f0d6aa!important;border:2px ridge #c9a36d!important;
+}
+#modalBody.hb-build-modal .screenTitle,#modalBody.hb-recruit-modal .screenTitle,
+#modalBody.hb-inventory-modal .screenTitle{
+  position:relative!important;top:auto!important;left:auto!important;right:auto!important;
+  order:0!important;flex:0 0 auto!important;
+  margin:0 0 7px!important;padding:6px 20px!important;
+  width:100%!important;height:auto!important;min-height:41px!important;
+  border:2px ridge #b89157!important;
+  background:linear-gradient(#6c2e3c,#351a27)!important;
+  clip-path:none!important;
+  box-shadow:inset 0 0 5px #1e0b13!important;
+}
+#modalBody.hb-build-modal .screenTitle h2,#modalBody.hb-recruit-modal .screenTitle h2,
+#modalBody.hb-inventory-modal .screenTitle h2{
+  margin:0!important;font-size:clamp(21px,2.2vw,29px)!important;
+  color:#f5ddb8!important;
+}
+#modalBody.hb-build-modal .stickyRes,#modalBody.hb-recruit-modal .stickyRes{
+  position:relative!important;top:auto!important;
+  order:1!important;flex:0 0 auto!important;
+  display:flex!important;align-items:center!important;justify-content:center!important;
+  min-height:38px!important;height:auto!important;
+  margin:0 0 9px!important;padding:6px 10px!important;
+  overflow:hidden!important;
+  border:2px ridge #b79a72!important;
+  background:rgba(232,211,172,.98)!important;
+  color:#38291e!important;
+  font-size:14px!important;
+}
+#modalBody.hb-recruit-modal .recruitTabs{
+  order:2!important;flex:0 0 auto!important;
+  margin:0 0 10px!important;gap:8px!important;min-height:42px!important;
+}
+#modalBody.hb-recruit-modal .recruitTabs>button{
+  font-size:17px!important;min-height:42px!important;
+  background:linear-gradient(#493333,#211b21)!important;
+  border:3px ridge #9a7751!important;color:#f0d6b1!important;
+}
+#modalBody.hb-recruit-modal .recruitTabs>button.active{
+  background:linear-gradient(#7e3949,#48202f)!important;border-color:#dab56f!important;
+}
+#modalBody.hb-recruit-modal .recruitScreen,
+#modalBody.hb-build-modal .buildScreen,
+#modalBody.hb-inventory-modal .inventoryScreen{
+  position:relative!important;
+  order:3!important;flex:0 0 auto!important;
+  display:grid!important;
+  grid-template-columns:minmax(0,1.1fr) minmax(0,1fr)!important;
+  gap:12px!important;
+  width:100%!important;min-width:0!important;
+  align-items:stretch!important;
+  margin:0!important;
+}
+#modalBody.hb-recruit-modal .unitGrid{
+  display:grid!important;
+  grid-template-columns:repeat(4,minmax(0,1fr))!important;
+  grid-auto-rows:minmax(118px,auto)!important;
+  align-content:start!important;gap:8px!important;
+  min-height:315px!important;max-height:min(39vh,390px)!important;
+  padding:13px!important;
+  overflow-y:auto!important;overflow-x:hidden!important;
+  background:rgba(27,20,26,.97)!important;
+  border:4px ridge #94734c!important;
+  box-shadow:inset 0 0 0 2px #141014!important;
+}
+#modalBody.hb-recruit-modal .unitGrid .unitTile{
+  display:flex!important;flex-direction:column!important;
+  width:100%!important;min-width:0!important;
+  min-height:116px!important;padding:7px 4px!important;
+  align-items:center!important;justify-content:flex-start!important;
+  border:2px ridge #9d7b52!important;
+  background:linear-gradient(#43323b,#1d1720)!important;
+  box-shadow:inset 0 0 9px #0d0b10!important;
+  color:#f3dcbb!important;
+}
+#modalBody.hb-recruit-modal .unitTile.selected{
+  outline:2px solid #edc471!important;outline-offset:0!important;
+}
+#modalBody.hb-recruit-modal .unitTile .portrait{
+  width:clamp(46px,5vw,75px)!important;height:72px!important;
+  flex:0 0 72px!important;min-height:72px!important;
+}
+#modalBody.hb-recruit-modal .unitTile .unitTileName{font-size:15px!important}
+#modalBody.hb-recruit-modal .unitTile small{
+  font-size:10px!important;line-height:1.2!important;
+  white-space:normal!important;
+}
+#modalBody.hb-recruit-modal .recruitInspector{
+  min-width:0!important;
+  min-height:315px!important;max-height:min(39vh,390px)!important;
+  overflow-y:auto!important;overflow-x:hidden!important;
+  padding:13px!important;
+  background:rgba(237,214,174,.98)!important;
+  border:4px ridge #997750!important;
+  box-shadow:inset 0 0 0 2px #e7cda2!important;
+  color:#34271c!important;
+}
+#modalBody.hb-recruit-modal .recruitSelectedHead{
+  display:flex!important;align-items:flex-start!important;
+  gap:10px!important;min-width:0!important;
+  padding-bottom:7px!important;
+}
+#modalBody.hb-recruit-modal .recruitSelectedHead .portrait{
+  flex:0 0 85px!important;width:85px!important;height:94px!important;
+  object-fit:contain!important;
+}
+#modalBody.hb-recruit-modal .recruitSelectedHead h3{font-size:24px!important}
+#modalBody.hb-recruit-modal .recruitStats{
+  display:grid!important;grid-template-columns:repeat(2,minmax(0,1fr))!important;
+  gap:4px!important;margin:9px 0!important;
+}
+#modalBody.hb-recruit-modal .recruitStat{
+  min-width:0!important;overflow:hidden!important;
+  background:#e9d6b0!important;padding:5px!important;
+  grid-template-columns:20px minmax(0,1fr) auto!important;
+}
+#modalBody.hb-recruit-modal .recruitStat b{
+  font-size:12px!important;max-width:110px!important;
+  white-space:normal!important;overflow-wrap:anywhere!important;
+}
+#modalBody.hb-recruit-modal .recruitPurchase{
+  display:flex!important;align-items:center!important;gap:5px!important;
+  flex-wrap:wrap!important;
+}
+#modalBody.hb-recruit-modal .recruitPurchase button{min-height:34px!important}
+#modalBody.hb-recruit-modal .recruitPurchase button.primary{margin-left:auto!important}
+#modalBody.hb-build-modal .buildingSelection,
+#modalBody.hb-build-modal .buildingInspector{
+  min-width:0!important;
+  min-height:370px!important;max-height:min(51vh,490px)!important;
+  overflow-y:auto!important;overflow-x:hidden!important;
+  padding:12px!important;
+  background:rgba(234,211,174,.97)!important;
+  border:4px ridge #987652!important;
+}
+#modalBody.hb-build-modal .buildingTileGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important;gap:7px!important}
+#modalBody.hb-build-modal .buildingTile{min-height:85px!important}
+#modalBody.hb-build-modal .buildingHeroArt{
+  height:clamp(105px,17vh,170px)!important;
+  background:radial-gradient(#655058,#231b24)!important;
+  border:3px ridge #ac8855!important;
+}
+#modalBody.hb-build-modal .upgradeTileGrid{grid-template-columns:repeat(3,minmax(0,1fr))!important}
+#modalBody.hb-inventory-modal .inventoryScreen{
+  grid-template-columns:minmax(0,.72fr) minmax(0,1fr) minmax(0,1fr)!important;
+  min-height:400px!important;
+}
+#modalBody.hb-inventory-modal .inventoryScreen>section{
+  min-width:0!important;min-height:390px!important;
+  max-height:min(53vh,500px)!important;
+  overflow-y:auto!important;overflow-x:hidden!important;
+  padding:13px!important;
+  background:rgba(232,208,170,.97)!important;
+  border:4px ridge #997651!important;
+}
+#modalBody.hb-inventory-modal .lichPortraitLarge{
+  background:radial-gradient(#543457,#1d1724)!important;
+  border:3px ridge #97764d!important;
+}
+#modalBody.hb-inventory-modal .artifactInventoryGrid{
+  grid-template-columns:repeat(3,minmax(0,1fr))!important;
+}
+#modalBody.hb-build-modal .screenFoot,#modalBody.hb-recruit-modal .screenFoot{
+  position:relative!important;order:4!important;
+  display:block!important;
+  width:100%!important;
+  margin:8px 0 0!important;padding:5px 8px!important;
+  background:rgba(234,208,164,.97)!important;
+  border:1px solid #927650!important;
+  font-size:12px!important;line-height:1.25!important;
+  color:#56422d!important;text-align:center!important;
+}
+#modalBody.hb-build-modal>.buttons,#modalBody.hb-recruit-modal>.buttons,
+#modalBody.hb-inventory-modal>.buttons{
+  position:relative!important;order:5!important;
+  flex:0 0 auto!important;display:flex!important;justify-content:flex-end!important;
+  margin:9px 0 0!important;padding:0!important;
+  border:0!important;
+}
+#modalBody.hb-build-modal>.buttons button,#modalBody.hb-recruit-modal>.buttons button,
+#modalBody.hb-inventory-modal>.buttons button{
+  min-height:35px!important;padding:6px 16px!important;
+  background:linear-gradient(#67313c,#331c2b)!important;
+  border:2px ridge #b99461!important;color:#f6dfb1!important;
+}
+/* Simple readable threat ledger over painted parchment */
+#threatPop{
+  padding:73px 35px 30px!important;
+  background-image:var(--hb-asset-factions)!important;
+  background-size:100% 100%!important;
+  border:0!important;
+}
+#threatPop h3{margin:0 0 8px!important;padding:3px!important;
+  background:rgba(233,210,169,.96)!important;font-size:22px!important}
+#threatPop .threat{
+  background:rgba(236,215,176,.95)!important;
+  border-bottom:1px solid #97784f!important;
+  padding:6px 5px!important;
+}
+#threatPop>p.small{background:rgba(236,214,173,.95)!important;padding:5px!important}
+
+@media(max-width:1330px){
+  #header #bottomBar #threatChip,#header #bottomBar #btnNews{flex-basis:110px!important;font-size:12px!important}
+  #sidebar{grid-template-columns:clamp(210px,22vw,290px) minmax(0,1fr) clamp(205px,21vw,280px)!important;
+    gap:7px!important;padding:27px 12px 12px!important}
+  #sidebar .hudHeroPanel{grid-template-columns:70px minmax(90px,1fr)!important}
+  #sidebar .hudStats{display:none!important}
+}
+@media(max-width:900px){
+  :root{--hb-header-height:77px;--hb-hud-height:190px}
+  #hbBrand{display:none!important}
+  #header #bottomBar #resources{width:53%!important;max-width:53%!important;flex-basis:53%!important}
+  #header #bottomBar #threatChip,#header #bottomBar #btnNews{flex-basis:80px!important;padding:1px!important;font-size:10px!important}
+  #sidebar{grid-template-columns:130px minmax(0,1fr) 150px!important;padding:14px 4px 6px!important;gap:4px!important}
+  #sidebar #minimap{padding:3px!important}
+  #sidebar #minimap .mapSite .siteText{display:none!important}
+  #sidebar #armyPanel{padding:4px!important}
+  #sidebar .hudHeroPanel{grid-template-columns:40px minmax(0,1fr)!important;gap:3px!important}
+  #sidebar .hudIdentity h2{font-size:15px!important}
+  #sidebar .hudIdentity .hudLocation{font-size:10px!important}
+  #sidebar .hudMeter{height:19px!important}
+  #sidebar #worldButtons{padding:2px!important;gap:2px!important}
+  #sidebar #worldButtons>button{font-size:10px!important;padding:1px!important}
+  #sidebar #worldButtons .sigilIcon[data-sigil]{width:28px!important;height:28px!important}
+  #modalBody.hb-build-modal .buildScreen,#modalBody.hb-recruit-modal .recruitScreen,
+  #modalBody.hb-inventory-modal .inventoryScreen{grid-template-columns:1fr!important}
+  #modalBody.hb-recruit-modal .unitGrid{max-height:290px!important;grid-template-columns:repeat(3,minmax(0,1fr))!important}
+  #modalBody.hb-recruit-modal .recruitInspector{max-height:300px!important}
+  #modalBody.hb-build-modal .buildingSelection,#modalBody.hb-build-modal .buildingInspector{
+    max-height:320px!important;min-height:0!important}
+  #modalBody.hb-inventory-modal .inventoryScreen>section{min-height:0!important;max-height:300px!important}
+  #info{width:260px!important}
+}
+@media(max-width:550px){
+  #header #bottomBar #resources .chip .lbl{display:none!important}
+  #modalBody.hb-build-modal,#modalBody.hb-recruit-modal,#modalBody.hb-inventory-modal{
+    padding:64px 14px 17px!important}
+  #modalBody.hb-build-modal .buildingTileGrid{grid-template-columns:1fr!important}
+  #modalBody.hb-recruit-modal .unitGrid{grid-template-columns:repeat(2,minmax(0,1fr))!important}
+  #sidebar{grid-template-columns:98px minmax(0,1fr) 115px!important}
+  #sidebar .hudPortrait{display:none!important}
+  #sidebar .hudHeroPanel{grid-template-columns:1fr!important}
+}
