@@ -4,6 +4,16 @@ Browser-Prototyp eines rundenbasierten Taktikspiels: Mai 1371, ein Lich erwacht 
 
 **Online spielen:** https://frozenenenen.github.io/Harmbringer_online/
 
+## UI-Redesign im Browser testen
+
+Die neue mittelalterliche Oberfläche liegt auf dem Branch `ui-redesign`. Ohne Download lässt sie sich über einen externen GitHub-Datei-Proxy öffnen:
+
+**[Testversion starten (raw.githack.com)](https://raw.githack.com/propain66/Harmbringer_online/ui-redesign/index.html)**
+
+Der Proxy kann vor dem ersten Aufruf einen Bestätigungsbildschirm anzeigen und neue Commits verzögert übernehmen. Dieser Link dient der Vorschau; GitHub Pages kann alternativ in den Repository-Einstellungen unter **Pages → Deploy from a branch → ui-redesign → /(root)** direkt den Entwicklungszweig veröffentlichen. Der `main`-Zweig bleibt dabei unverändert.
+
+Neu im UI: düsterer Holz-/Eisenstil, Gebäuderaster mit ausgewählten Details und Verbesserungsmedaillons, Truppenkategorien mit noch nicht freigeschalteten Einheiten, platzbasiertes Rekrutieren, Relikt-/Artefaktübersicht und kompakte Fraktionswarnstufen. Spielwerte und Save-Format sind unverändert.
+
 ## Orte
 
 19 größere Orte (Städte, Klöster, mythische Stätten) und 48 Dörfer dazwischen. Dörfer haben ein kleines Kampffeld mit zwei Höfen, 2–3 Verteidiger, wenig Beute und erhöhen die Bedrohung ihrer Fraktion nur um 10 % statt 25 %. Nach einem Sieg heilen die Überlebenden um 25 % ihrer Lebenspunkte; voll geheilt wird weiterhin im Hügelgrab.
